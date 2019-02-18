@@ -11,7 +11,7 @@ import (
 var _ weave.Msg = (*VoteRecord)(nil)
 
 const (
-	pathVoteRecord = "votes/record"
+	pathRecordVote = "votes/record"
 )
 
 var (
@@ -21,7 +21,7 @@ var (
 )
 
 // Path is used for Handler routing
-func (VoteRecord) Path() string { return pathVoteRecord }
+func (VoteRecord) Path() string { return pathRecordVote }
 
 // Validate enforces desired rules for content of the VoteRecord
 func (m *VoteRecord) Validate() error {
