@@ -23,7 +23,6 @@ tf:
 
 dist: clean test build image
 
-
 build:
 	GOARCH=amd64 CGO_ENABLED=0 GOOS=linux go build $(BUILD_FLAGS) $(DOCKER_BUILD_FLAGS) -o $(BUILDOUT) .
 

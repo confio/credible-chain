@@ -32,10 +32,6 @@ You can install all dependencies, run tests, and compile a new image simply by c
 
 You can build a docker image with the current commit (ideally on a tag) with:
 
-`make image`
-
-Or run full tests and prepare a docker image with:
-
 `make dist`
 
 ## Running the chain
