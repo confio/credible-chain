@@ -43,7 +43,7 @@ tools:
 	@go get github.com/golang/dep/cmd/dep
 
 protoc: prototools
-	protoc --gogofaster_out=. -I=. -I=$(GOPATH)/src app/*.proto
+	protoc --gogofaster_out=. -I=. -I=./vendor -I=$(GOPATH)/src app/*.proto
 
 ### cross-platform check for installing protoc ###
 
