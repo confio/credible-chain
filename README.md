@@ -30,23 +30,30 @@ We want to embed the sms message into a few human readable words representing th
 
 ```golang
 type Vote struct {
-    MainVote int8 // 0-3 for the main votes
-    RepVote int16 // 0-1023 for the rep
-    Age int8 // 0-127 for age
-    PostCode int16 // 0-3000 for postcode -> use lookup table
-    Donation int16 // how many pence is being donated
+    MainVote string // 1 character (A B C)
+    RepVote string // 4 characters
+    Charity string // 3 characters
+    PostCode string // 3-4 characters, valid UK post code prefix
+    BirthYear int32 // Hopefully somewhere between 1900 and 2002
+    Donation int32  // How many pence were donated
 }
 ```
 
-Except the donation, this is 2 + 10 + 7 + 12 = 31 bits... which we fit into 3 words of bip39, and the Donation
-must be appended as a raw amount on the end for the SMS gateway, so we get something like:
-`Hungry fox rebellion 10` to donate 10 pence to a charity and cast a vote that is encoded as `Hungry fox rebellion`
+This is encoded into a string like `ABRANADASW161980 50`, which is equivalent to:
+
+```golang
+Vote{
+    MainVote: "A",
+    RepVote: "BRAN",
+    Charity: "ADA",
+    PostCode: "SW16",
+    BirthYear: 1980,
+    Donation: 50,
+}
+```
 
 We will provide an encode/decode function from words to vote both in js (for the client) and in go (to write to the db).
 We can also provide an online tool to allow people to ensure their code matches their choices.
-
-Note that this requires a lookup table for Reps and PostCodes and MainVote.
-This must be stored in the API database, ideally also in the blockchain.
 
 ## Blockchain Design
 
