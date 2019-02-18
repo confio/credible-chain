@@ -34,6 +34,13 @@ You can build a docker image with the current commit (ideally on a tag) with:
 
 `make dist`
 
+Check the docker image is build properly...
+
+```shell
+docker images | grep credible
+docker run confio/credible-chain version
+```
+
 ## Running the chain
 
 **TODO**

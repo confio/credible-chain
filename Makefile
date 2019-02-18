@@ -4,7 +4,8 @@ BUILD_VERSION ?= $(shell git describe --tags)
 BUILD_FLAGS := -ldflags "-X main.Version=${BUILD_VERSION}"
 DOCKER_BUILD_FLAGS := -a -installsuffix cgo
 BUILDOUT ?= credible-chain
-IMAGE_NAME = "confio/credible-chain:${BUILD_VERSION}"
+IMAGE_NAME = "confio/credible-chain"
+IMAGE_VERSION = "confio/credible-chain:${BUILD_VERSION}"
 
 ### Basic
 
@@ -30,9 +31,11 @@ clean:
 	rm -f ${BUILDOUT}
 
 image:
-	@echo "Only builds docker image if all changes have been committed"
+	@echo "Only builds docker image if all changes have been committed\n"
 	@git diff-index --quiet HEAD
 	docker build --pull -t $(IMAGE_NAME) .
+	docker tag $(IMAGE_NAME) $(IMAGE_VERSION)
+	@echo "Built $(IMAGE_VERSION) as $(IMAGE_NAME):latest"
 
 ### Tools
 
