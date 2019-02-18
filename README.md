@@ -24,37 +24,6 @@ from the sms gateway in order to allow people to spot-check transactions and ver
 that everything is being done legitimately. This is the main purpose of the blockchain -
 to provide a fully transparent, public ledger.
 
-## Message Design
-
-We want to embed the sms message into a few human readable words representing the following data:
-
-```golang
-type Vote struct {
-    MainVote string // 1 character (A B C)
-    RepVote string // 4 characters
-    Charity string // 3 characters
-    PostCode string // 3-4 characters, valid UK post code prefix
-    BirthYear int32 // Hopefully somewhere between 1900 and 2002
-    Donation int32  // How many pence were donated
-}
-```
-
-This is encoded into a string like `ABRANADASW161980 50`, which is equivalent to:
-
-```golang
-Vote{
-    MainVote: "A",
-    RepVote: "BRAN",
-    Charity: "ADA",
-    PostCode: "SW16",
-    BirthYear: 1980,
-    Donation: 50,
-}
-```
-
-We will provide an encode/decode function from words to vote both in js (for the client) and in go (to write to the db).
-We can also provide an online tool to allow people to ensure their code matches their choices.
-
 ## Blockchain Design
 
 We build the application using the [weave framework](github.com/iov-one/weave),
@@ -70,6 +39,8 @@ type VoteRecord struct {
     VotedAt time.Time // when the vote was cast  
 }
 ```
+
+Note that the `Vote` structure is defined in the [main application docs](https://github.com/jpincas/credible-choice/blob/master/README.md#message-design--sms-format)
 
 We define a set of notaries in the genesis file, and any submitted VoteRecord must be signed by at least one of them.
 If the Identifier was not present, add this record and add the votes to the tally.
