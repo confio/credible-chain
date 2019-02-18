@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/iov-one/weave"
 	"github.com/iov-one/weave/commands"
 	"github.com/iov-one/weave/commands/server"
 	"github.com/tendermint/tendermint/libs/log"
@@ -17,6 +16,9 @@ import (
 var (
 	flagHome = "home"
 	varHome  *string
+
+	// Version should be set by build flags: `git describe --tags`
+	Version = "please set in makefile"
 )
 
 func init() {
@@ -70,7 +72,7 @@ func main() {
 	case "testgen":
 		err = commands.TestGenCmd(app.Examples(), rest)
 	case "version":
-		fmt.Println(weave.Version)
+		fmt.Println(Version)
 	default:
 		err = fmt.Errorf("unknown command: %s", cmd)
 	}

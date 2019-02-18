@@ -1,10 +1,10 @@
 .PHONY: all build test image tf protoc clean dist
 
-BUILD_VERSION ?= `git describe --tags`
-BUILD_FLAGS := -ldflags "-X github.com/iov-one/weave.Version=${BUILD_VERSION}"
+BUILD_VERSION ?= $(shell git describe --tags)
+BUILD_FLAGS := -ldflags "-X main.Version=${BUILD_VERSION}"
 DOCKER_BUILD_FLAGS := -a -installsuffix cgo
-BUILDOUT ?= credchain
-IMAGE_NAME = "confio/credchain:${BUILD_VERSION}"
+BUILDOUT ?= credible-chain
+IMAGE_NAME = "confio/credible-chain:${BUILD_VERSION}"
 
 ### Basic
 
