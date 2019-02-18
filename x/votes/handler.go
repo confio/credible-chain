@@ -4,7 +4,6 @@ import (
 	"github.com/iov-one/weave"
 	"github.com/iov-one/weave/errors"
 	"github.com/iov-one/weave/x"
-	"github.com/iov-one/weave/x/cash"
 )
 
 const (
@@ -18,7 +17,7 @@ func RegisterQuery(qr weave.QueryRouter) {
 }
 
 // RegisterRouters registers payment channel message handelers in given registry.
-func RegisterRoutes(r weave.Registry, auth x.Authenticator, cash cash.Controller) {
+func RegisterRoutes(r weave.Registry, auth x.Authenticator) {
 	bucket := NewVoteBucket()
 	tallies := NewTallyBucket()
 	r.Handle(pathRecordVote, &recordVoteHandler{auth: auth, bucket: bucket, tallies: tallies})

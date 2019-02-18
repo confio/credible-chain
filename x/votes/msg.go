@@ -1,6 +1,7 @@
 package votes
 
 import (
+	fmt "fmt"
 	"regexp"
 	time "time"
 
@@ -15,9 +16,9 @@ const (
 )
 
 var (
-	isAlpha        = regexp.MustCompile("^[a-zA-Z]$")
-	isNumeric      = regexp.MustCompile("^[0-9]$")
-	isAlphaNumeric = regexp.MustCompile("^[a-zA-Z0-9]$")
+	isAlpha        = regexp.MustCompile("^[a-zA-Z]+$")
+	isNumeric      = regexp.MustCompile("^[0-9]+$")
+	isAlphaNumeric = regexp.MustCompile("^[a-zA-Z0-9]+$")
 )
 
 // Path is used for Handler routing
@@ -51,8 +52,8 @@ func (m *Vote) Validate() error {
 	if len(m.MainVote) != 1 || !isAlpha.MatchString(m.MainVote) {
 		return errors.ErrInternal("MainVote must be 1 character")
 	}
-	if len(m.RepVote) != 5 || !isAlpha.MatchString(m.MainVote[:4]) || isNumeric.MatchString(m.MainVote[4:]) {
-		return errors.ErrInternal("RepVote must be 4 letters and 1 digit")
+	if len(m.RepVote) != 5 || !isAlpha.MatchString(m.RepVote[:4]) || !isNumeric.MatchString(m.RepVote[4:]) {
+		return errors.ErrInternal(fmt.Sprintf("RepVote must be 4 letters (%s) and 1 digit (%s)", m.RepVote[:4], m.RepVote[4:]))
 	}
 	if len(m.Charity) != 3 || !isAlpha.MatchString(m.Charity) {
 		return errors.ErrInternal("Charity must be 3 letters")
@@ -67,4 +68,9 @@ func (m *Vote) Validate() error {
 		return errors.ErrInternal("Donation must be between 0 and 100 pounds")
 	}
 	return nil
+}
+
+// EncodeToSms will produce the code for the sms to send...
+func (m *Vote) EncodeToSms() string {
+	return "SMScodeNOTimplemented"
 }

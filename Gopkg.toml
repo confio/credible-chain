@@ -52,14 +52,10 @@ required = ["github.com/gogo/protobuf/protoc-gen-gogofaster"]
   version = "~0.12.0"
 
 [[constraint]]
-  name = "github.com/pkg/errors"
-  version = "0.8.0"
-
-[[constraint]]
   name = "github.com/stretchr/testify"
   version = "1.2.1"
 
 [prune]
   go-tests = true
-  unused-packages = true
+  # unused-packages = true
 
