@@ -24,6 +24,24 @@ from the sms gateway in order to allow people to spot-check transactions and ver
 that everything is being done legitimately. This is the main purpose of the blockchain -
 to provide a fully transparent, public ledger.
 
+## Building the command
+
+You can install all dependencies, run tests, and compile a new image simply by checking out this repo and running:
+
+`make all`
+
+You can build a docker image with the current commit (ideally on a tag) with:
+
+`make image`
+
+Or run full tests and prepare a docker image with:
+
+`make dist`
+
+## Running the chain
+
+**TODO**
+
 ## Blockchain Design
 
 We build the application using the [weave framework](github.com/iov-one/weave),

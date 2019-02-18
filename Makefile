@@ -31,6 +31,8 @@ clean:
 	rm -f ${BUILDOUT}
 
 image:
+	@echo "Only builds docker image if all changes have been committed"
+	@git diff-index --quiet HEAD
 	docker build --pull -t $(IMAGE_NAME) .
 
 ### Tools
