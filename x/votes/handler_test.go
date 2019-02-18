@@ -9,6 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/tendermint/tendermint/libs/common"
+
 	"github.com/iov-one/weave"
 	"github.com/iov-one/weave/app"
 	"github.com/iov-one/weave/orm"
@@ -21,7 +23,7 @@ const defaultHeight int64 = 10
 var helper x.TestHelpers
 
 func randString(len int) string {
-	return "abcdefghi"
+	return common.RandStr(len)
 }
 
 func mustBuildVote(mainVote, repVote, charity, postCode string, birth, donation int32, id string) *VoteRecord {
@@ -55,10 +57,17 @@ func buildVote(mainVote, repVote, charity, postCode string, birth, donation int3
 	return res, res.Validate()
 }
 
+func buildTally(option string, total int64) orm.Object {
+	return orm.NewSimpleObj([]byte(option), &Tally{
+		Option: option,
+		Total:  total,
+	})
+}
+
 func TestRecordVoteHandler(t *testing.T) {
 	auth := helper.CtxAuth("auth")
 	voteBucket := NewVoteBucket()
-	// tallyBucket := NewTallyBucket()
+	tallyBucket := NewTallyBucket()
 
 	rt := app.NewRouter()
 	RegisterRoutes(rt, auth)
@@ -68,8 +77,17 @@ func TestRecordVoteHandler(t *testing.T) {
 
 	_, src := helper.MakeKey()
 
-	vote1 := mustBuildVote("A", "SOME1", "HLP", "SW87", 1991, 100, "")
+	rep1 := "SOME1"
+	rep2 := "ELSE4"
+
+	// this is for over-writing
+	vote1 := mustBuildVote("A", rep1, "HLP", "SW87", 1991, 100, "")
 	id1 := vote1.Identitifer
+	vote1b := mustBuildVote("B", rep2, "FOO", "SW87", 1991, 100, id1)
+
+	// this is for addition
+	vote2 := mustBuildVote("A", rep2, "MRE", "B18", 1980, 500, "")
+	id2 := vote2.Identitifer
 
 	cases := map[string]struct {
 		actions []action
@@ -89,6 +107,128 @@ func TestRecordVoteHandler(t *testing.T) {
 					bucket: voteBucket.Bucket,
 					wantRes: []orm.Object{
 						orm.NewSimpleObj([]byte(id1), vote1),
+					},
+				},
+				{
+					path:   "/tally",
+					data:   []byte("A"),
+					bucket: tallyBucket.Bucket,
+					wantRes: []orm.Object{
+						buildTally("A", 1),
+					},
+				},
+				{
+					path:   "/tally",
+					data:   []byte(rep1),
+					bucket: tallyBucket.Bucket,
+					wantRes: []orm.Object{
+						buildTally(rep1, 1),
+					},
+				},
+				{
+					path:   "/tally",
+					mod:    "prefix",
+					bucket: tallyBucket.Bucket,
+					wantRes: []orm.Object{
+						buildTally("A", 1),
+						buildTally(rep1, 1),
+					},
+				},
+			},
+		},
+		"can update vote": {
+			actions: []action{
+				{
+					conditions: []weave.Condition{src},
+					msg:        vote1,
+				},
+				{
+					conditions: []weave.Condition{src},
+					msg:        vote1b,
+				},
+			},
+			dbtests: []querycheck{
+				{
+					path:   "/vote",
+					data:   []byte(id1),
+					bucket: voteBucket.Bucket,
+					wantRes: []orm.Object{
+						orm.NewSimpleObj([]byte(id1), vote1b),
+					},
+				},
+				{
+					path:   "/tally",
+					data:   []byte("B"),
+					bucket: tallyBucket.Bucket,
+					wantRes: []orm.Object{
+						buildTally("B", 1),
+					},
+				},
+				{
+					path:   "/tally",
+					data:   []byte(rep2),
+					bucket: tallyBucket.Bucket,
+					wantRes: []orm.Object{
+						buildTally(rep2, 1),
+					},
+				},
+				{
+					path:   "/tally",
+					mod:    "prefix",
+					bucket: tallyBucket.Bucket,
+					wantRes: []orm.Object{
+						buildTally("A", 0),
+						buildTally("B", 1),
+						buildTally(rep2, 1),
+						buildTally(rep1, 0),
+					},
+				},
+			},
+		},
+		"can combine vote": {
+			actions: []action{
+				{
+					conditions: []weave.Condition{src},
+					msg:        vote1,
+				},
+				{
+					conditions: []weave.Condition{src},
+					msg:        vote2,
+				},
+			},
+			dbtests: []querycheck{
+				{
+					path:   "/vote",
+					data:   []byte(id1),
+					bucket: voteBucket.Bucket,
+					wantRes: []orm.Object{
+						orm.NewSimpleObj([]byte(id1), vote1),
+					},
+				},
+				{
+					path:   "/vote",
+					data:   []byte(id2),
+					bucket: voteBucket.Bucket,
+					wantRes: []orm.Object{
+						orm.NewSimpleObj([]byte(id2), vote2),
+					},
+				},
+				{
+					path:   "/tally",
+					data:   []byte("A"),
+					bucket: tallyBucket.Bucket,
+					wantRes: []orm.Object{
+						buildTally("A", 2),
+					},
+				},
+				{
+					path:   "/tally",
+					mod:    "prefix",
+					bucket: tallyBucket.Bucket,
+					wantRes: []orm.Object{
+						buildTally("A", 2),
+						buildTally(rep2, 1),
+						buildTally(rep1, 1),
 					},
 				},
 			},
@@ -152,6 +292,7 @@ func (a *action) ctx() weave.Context {
 // Make sure to register the query router.
 type querycheck struct {
 	path    string
+	mod     string
 	data    []byte
 	bucket  orm.Bucket
 	wantRes []orm.Object
@@ -161,17 +302,14 @@ type querycheck struct {
 func (qc *querycheck) test(t *testing.T, db weave.ReadOnlyKVStore, qr weave.QueryRouter) {
 	t.Helper()
 
-	result, err := qr.Handler(qc.path).Query(db, "", qc.data)
+	result, err := qr.Handler(qc.path).Query(db, qc.mod, qc.data)
 	require.NoError(t, err)
 	require.Equal(t, len(qc.wantRes), len(result))
 	for i, wres := range qc.wantRes {
 		assert.True(t, bytes.HasSuffix(result[i].Key, wres.Key()))
 
-		got, err := qc.bucket.Parse(nil, result[i].Value)
+		got, err := qc.bucket.Parse(wres.Key(), result[i].Value)
 		require.NoError(t, err)
-		wvr := wres.Value().(*VoteRecord)
-		gvr := got.Value().(*VoteRecord)
-		assert.Equal(t, wvr.Vote, gvr.Vote)
-		assert.Equal(t, wvr.VotedAt, gvr.VotedAt)
+		assert.Equal(t, wres, got)
 	}
 }
