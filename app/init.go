@@ -2,12 +2,14 @@ package credchain
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"path/filepath"
 
 	"github.com/iov-one/weave"
 	"github.com/iov-one/weave/app"
+	"github.com/iov-one/weave/gconf"
 	"github.com/iov-one/weave/x/multisig"
 
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -16,11 +18,25 @@ import (
 
 // GenInitOptions will produce empty structure to fill in
 func GenInitOptions(args []string) (json.RawMessage, error) {
+	if len(args) != 1 {
+		return nil, fmt.Errorf("Usage: init <notary address hex>")
+	}
+	bz, err := hex.DecodeString(args[0])
+	if err != nil {
+		return nil, err
+	}
+	err = weave.Address(bz).Validate()
+	if err != nil {
+		return nil, err
+	}
 	opts := fmt.Sprintf(`
           {
-            "multisig": [],
+			"multisig": [],
+			"gconf": {
+				"votes:notary": "%s"
+			}	
           }
-	`)
+	`, args[0])
 	return []byte(opts), nil
 }
 
@@ -42,6 +58,7 @@ func GenerateApp(home string, logger log.Logger, debug bool) (abci.Application, 
 // DecorateApp adds initializers and Logger to an Application
 func DecorateApp(application app.BaseApp, logger log.Logger) app.BaseApp {
 	application.WithInit(app.ChainInitializers(
+		&gconf.Initializer{},
 		&multisig.Initializer{},
 	))
 	application.WithLogger(logger)

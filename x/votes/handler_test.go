@@ -3,8 +3,11 @@ package votes
 import (
 	"bytes"
 	"context"
+	"encoding/hex"
 	"testing"
 	time "time"
+
+	"github.com/iov-one/weave/gconf"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -27,14 +30,14 @@ func randString(len int) string {
 }
 
 func mustBuildVote(mainVote, repVote, charity, postCode string, birth, donation int32, id string) *VoteRecord {
-	res, err := buildVote(mainVote, repVote, charity, postCode, birth, donation, id)
-	if err != nil {
+	res := buildVote(mainVote, repVote, charity, postCode, birth, donation, id)
+	if err := res.Validate(); err != nil {
 		panic(err)
 	}
 	return res
 }
 
-func buildVote(mainVote, repVote, charity, postCode string, birth, donation int32, id string) (*VoteRecord, error) {
+func buildVote(mainVote, repVote, charity, postCode string, birth, donation int32, id string) *VoteRecord {
 	vote := &Vote{
 		MainVote:  mainVote,
 		RepVote:   repVote,
@@ -54,7 +57,7 @@ func buildVote(mainVote, repVote, charity, postCode string, birth, donation int3
 		VotedAt:       &now,
 		Vote:          vote,
 	}
-	return res, res.Validate()
+	return res
 }
 
 func buildTally(option string, total int64) orm.Object {
@@ -75,7 +78,8 @@ func TestRecordVoteHandler(t *testing.T) {
 	qr := weave.NewQueryRouter()
 	RegisterQuery(qr)
 
-	_, src := helper.MakeKey()
+	_, us := helper.MakeKey()
+	_, them := helper.MakeKey()
 
 	rep1 := "SOME1"
 	rep2 := "ELSE4"
@@ -93,10 +97,54 @@ func TestRecordVoteHandler(t *testing.T) {
 		actions []action
 		dbtests []querycheck
 	}{
+		"requires valid signature": {
+			actions: []action{
+				{
+					conditions:     []weave.Condition{them},
+					msg:            vote1,
+					wantCheckErr:   true,
+					wantDeliverErr: true,
+				},
+			},
+		},
+		"rejects invalid votes": {
+			actions: []action{
+				{
+					conditions:     []weave.Condition{us},
+					msg:            buildVote("APE", rep1, "HLP", "SW87", 1991, 100, ""),
+					wantCheckErr:   true,
+					wantDeliverErr: true,
+				},
+				{
+					conditions:     []weave.Condition{us},
+					msg:            buildVote("A", "NOONE", "HLP", "SW87", 1991, 100, ""),
+					wantCheckErr:   true,
+					wantDeliverErr: true,
+				},
+				{
+					conditions:     []weave.Condition{us},
+					msg:            buildVote("A", rep1, "HLP", "SW87", 91, 100, ""),
+					wantCheckErr:   true,
+					wantDeliverErr: true,
+				},
+				{
+					conditions:     []weave.Condition{us},
+					msg:            buildVote("A", rep1, "HLP", "SW87", 2010, 100, ""),
+					wantCheckErr:   true,
+					wantDeliverErr: true,
+				},
+				{
+					conditions:     []weave.Condition{us},
+					msg:            buildVote("A", rep1, "HLP", "SW87 K23", 1986, 100, ""),
+					wantCheckErr:   true,
+					wantDeliverErr: true,
+				},
+			},
+		},
 		"one vote is tallied": {
 			actions: []action{
 				{
-					conditions: []weave.Condition{src},
+					conditions: []weave.Condition{us},
 					msg:        vote1,
 				},
 			},
@@ -139,11 +187,11 @@ func TestRecordVoteHandler(t *testing.T) {
 		"can update vote": {
 			actions: []action{
 				{
-					conditions: []weave.Condition{src},
+					conditions: []weave.Condition{us},
 					msg:        vote1,
 				},
 				{
-					conditions: []weave.Condition{src},
+					conditions: []weave.Condition{us},
 					msg:        vote1b,
 				},
 			},
@@ -188,11 +236,11 @@ func TestRecordVoteHandler(t *testing.T) {
 		"can combine vote": {
 			actions: []action{
 				{
-					conditions: []weave.Condition{src},
+					conditions: []weave.Condition{us},
 					msg:        vote1,
 				},
 				{
-					conditions: []weave.Condition{src},
+					conditions: []weave.Condition{us},
 					msg:        vote2,
 				},
 			},
@@ -238,6 +286,7 @@ func TestRecordVoteHandler(t *testing.T) {
 	for testName, tc := range cases {
 		t.Run(testName, func(t *testing.T) {
 			db := store.MemStore()
+			gconf.SetValue(db, gconfNotary, hex.EncodeToString(us.Address()))
 
 			for i, a := range tc.actions {
 				cache := db.CacheWrap()

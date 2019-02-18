@@ -1,13 +1,17 @@
 package votes
 
 import (
+	"encoding/hex"
+
 	"github.com/iov-one/weave"
 	"github.com/iov-one/weave/errors"
+	"github.com/iov-one/weave/gconf"
 	"github.com/iov-one/weave/x"
 )
 
 const (
 	recordVoteCost int64 = 50
+	gconfNotary          = "votes:notary"
 )
 
 // RegisterQuery registers payment channel bucket under /paychans.
@@ -55,10 +59,11 @@ func (h *recordVoteHandler) validate(ctx weave.Context, db weave.KVStore, tx wea
 		return msg, err
 	}
 
-	// TODO: only allow authorized addresses (from genesis/init) to write
-	// if !h.auth.HasAddress(ctx, msg.Src) {
-	// 	return msg, errors.UnauthorizedErr.New("invalid address")
-	// }
+	// only allow authorized addresses (from genesis/init) to write
+	notar := h.getNotary(db)
+	if !h.auth.HasAddress(ctx, notar) {
+		return msg, errors.ErrUnauthorized()
+	}
 
 	return msg, nil
 }
@@ -134,4 +139,18 @@ func (h *recordVoteHandler) subtractTally(db weave.KVStore, option string) error
 	tally.Total--
 	_, err = h.tallies.Create(db, tally)
 	return err
+}
+
+// TODO: cache this on one load
+func (h *recordVoteHandler) getNotary(db weave.KVStore) weave.Address {
+	notary := gconf.String(db, gconfNotary)
+	bz, err := hex.DecodeString(notary)
+	if err != nil {
+		panic(err)
+	}
+	addr := weave.Address(bz)
+	if err := addr.Validate(); err != nil {
+		panic(err)
+	}
+	return addr
 }
