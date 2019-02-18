@@ -48,6 +48,7 @@ tools:
 
 protoc: prototools
 	protoc --gogofaster_out=. -I=. -I=./vendor -I=$(GOPATH)/src app/*.proto
+	protoc --gogofaster_out=. -I=. -I=./vendor -I=$(GOPATH)/src x/votes/*.proto
 
 ### cross-platform check for installing protoc ###
 

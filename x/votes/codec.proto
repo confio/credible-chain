@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package votes;
+
+import "google/protobuf/timestamp.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+message Vote {
+    string main_vote = 1;  // 1 letter (A, B, C)
+    string rep_vote = 2;   // 4 letter + 1 digit
+    string charity = 3;   // 3 letter
+    string postCode = 4;  // 3-4 chars
+    int32 birth_year = 5;
+    int32 donation = 6; // Amount in Pence
+}
+
+message VoteRecord {
+    Vote vote = 1;
+    string identitifer = 2;
+    string sms_code = 3;
+    string transaction_id = 4;
+    google.protobuf.Timestamp voted_at = 5 [(gogoproto.stdtime) = true];
+}
+
+message Tally {
+    string option = 1;
+    int64 total = 2;
+}
