@@ -23,10 +23,10 @@ func BuildVoteTx(identifier, smsCode, transactionID string, vote *votes.Vote) *a
 
 type Tally = votes.Tally
 
-func (b *BnsClient) GetTally(option string) (Tally, error) {
+func (c *CredibleClient) GetTally(option string) (Tally, error) {
 	var out Tally
 
-	resp, err := b.AbciQuery("/tally", []byte(option))
+	resp, err := c.AbciQuery("/tally", []byte(option))
 	if err != nil {
 		return out, err
 	}
@@ -39,8 +39,8 @@ func (b *BnsClient) GetTally(option string) (Tally, error) {
 	return out, err
 }
 
-func (b *BnsClient) GetAllTallies(option string) ([]Tally, error) {
-	resp, err := b.AbciQuery("/tally?prefix", nil)
+func (c *CredibleClient) GetAllTallies(option string) ([]Tally, error) {
+	resp, err := c.AbciQuery("/tally?prefix", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -57,8 +57,8 @@ func (b *BnsClient) GetAllTallies(option string) ([]Tally, error) {
 
 type VoteRecord = votes.VoteRecord
 
-func (b *BnsClient) GetVote(identifier string) (*VoteRecord, error) {
-	resp, err := b.AbciQuery("/vote", []byte(identifier))
+func (c *CredibleClient) GetVote(identifier string) (*VoteRecord, error) {
+	resp, err := c.AbciQuery("/vote", []byte(identifier))
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (b *BnsClient) GetVote(identifier string) (*VoteRecord, error) {
 // // GetWallet will return a wallet given an address
 // // If non wallet is present, it will return (nil, nil)
 // // Error codes are used when the query failed on the server
-// func (b *BnsClient) GetWallet(addr weave.Address) (*WalletResponse, error) {
+// func (b *CredibleClient) GetWallet(addr weave.Address) (*WalletResponse, error) {
 // 	// make sure we send a valid address to the server
 // 	err := addr.Validate()
 // 	if err != nil {

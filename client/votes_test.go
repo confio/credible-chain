@@ -3,16 +3,18 @@ package client
 import (
 	"testing"
 
-	"github.com/confio/credible-chain/x/votes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/iov-one/weave/store"
 	"github.com/iov-one/weave/x/sigs"
+
+	wc "github.com/confio/credible-chain/weaveclient"
+	"github.com/confio/credible-chain/x/votes"
 )
 
 func TestVoteTx(t *testing.T) {
-	admin := GenPrivateKey()
+	admin := wc.GenPrivateKey()
 	identifier := "xxx123456xxx"
 
 	// TODO: make the validation less strict

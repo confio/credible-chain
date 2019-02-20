@@ -2,6 +2,7 @@ package client
 
 import (
 	"github.com/iov-one/weave"
+	"github.com/iov-one/weave/crypto"
 	"github.com/iov-one/weave/x/sigs"
 
 	app "github.com/confio/credible-chain/app"
@@ -14,7 +15,7 @@ type Tx interface {
 }
 
 // SignTx modifies the tx in-place, adding signatures
-func SignTx(tx *app.Tx, signer *PrivateKey, chainID string, nonce int64) error {
+func SignTx(tx *app.Tx, signer *crypto.PrivateKey, chainID string, nonce int64) error {
 	sig, err := sigs.SignTx(signer, tx, chainID, nonce)
 	if err != nil {
 		return err

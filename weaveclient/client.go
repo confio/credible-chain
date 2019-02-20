@@ -36,20 +36,23 @@ type Client interface {
 	BroadcastTxSync(tx weave.Tx, timeout time.Duration) BroadcastTxResponse
 }
 
-// BnsClient is a tendermint client wrapped to provide
-// simple access to the data structures used in bns.
-type BnsClient struct {
+// WeaveClient is a tendermint client wrapped to provide
+// simple access to the basic data structures used in weave.
+//
+// The only extension it supports is sigs for the nonce, you can wrap this
+// in an app-specific class
+type WeaveClient struct {
 	conn client.Client
 	// subscriber is a unique identifier for subscriptions
 	subscriber string
 }
 
-var _ Client = (*BnsClient)(nil)
+var _ Client = (*WeaveClient)(nil)
 
-// NewClient wraps a BnsClient around an existing
+// NewClient wraps a WeaveClient around an existing
 // tendermint client connection.
-func NewClient(conn client.Client) *BnsClient {
-	return &BnsClient{
+func NewClient(conn client.Client) *WeaveClient {
+	return &WeaveClient{
 		conn: conn,
 		// TODO: make this random
 		subscriber: "tools-client",
@@ -112,12 +115,12 @@ func (n *Nonce) Next() (int64, error) {
 //************ generic (weave) functionality *************//
 
 // Status will return the raw status from the node
-func (b *BnsClient) Status() (*Status, error) {
+func (b *WeaveClient) Status() (*Status, error) {
 	return b.conn.Status()
 }
 
 // Genesis will return the genesis directly from the node
-func (b *BnsClient) Genesis() (*GenesisDoc, error) {
+func (b *WeaveClient) Genesis() (*GenesisDoc, error) {
 	gen, err := b.conn.Genesis()
 	if err != nil {
 		return nil, err
@@ -126,7 +129,7 @@ func (b *BnsClient) Genesis() (*GenesisDoc, error) {
 }
 
 // ChainID will parse out the chainID from the status result
-func (b *BnsClient) ChainID() (string, error) {
+func (b *WeaveClient) ChainID() (string, error) {
 	gen, err := b.Genesis()
 	if err != nil {
 		return "", err
@@ -135,7 +138,7 @@ func (b *BnsClient) ChainID() (string, error) {
 }
 
 // Height will parse out the Height from the status result
-func (b *BnsClient) Height() (int64, error) {
+func (b *WeaveClient) Height() (int64, error) {
 	status, err := b.conn.Status()
 	if err != nil {
 		return -1, err
@@ -156,7 +159,7 @@ type AbciResponse struct {
 // verifies if it is an error or empty, and if there is
 // data pulls out the ResultSets from keys and values into
 // a useful AbciResponse struct
-func (b *BnsClient) AbciQuery(path string, data []byte) (AbciResponse, error) {
+func (b *WeaveClient) AbciQuery(path string, data []byte) (AbciResponse, error) {
 	var out AbciResponse
 
 	q, err := b.conn.ABCIQuery(path, data)
@@ -188,7 +191,7 @@ func (b *BnsClient) AbciQuery(path string, data []byte) (AbciResponse, error) {
 	return out, err
 }
 
-func (b *BnsClient) TxSearch(query string, prove bool, page, perPage int) (*ctypes.ResultTxSearch, error) {
+func (b *WeaveClient) TxSearch(query string, prove bool, page, perPage int) (*ctypes.ResultTxSearch, error) {
 	return b.conn.TxSearch(query, prove, page, perPage)
 }
 
@@ -220,7 +223,7 @@ func (b BroadcastTxResponse) IsError() error {
 // blockchain.
 //
 // If you want high-performance, parallel sending, use BroadcastTxAsync
-func (b *BnsClient) BroadcastTx(tx weave.Tx) BroadcastTxResponse {
+func (b *WeaveClient) BroadcastTx(tx weave.Tx) BroadcastTxResponse {
 	out := make(chan BroadcastTxResponse, 1)
 	defer close(out)
 	go b.BroadcastTxAsync(tx, out)
@@ -228,7 +231,7 @@ func (b *BnsClient) BroadcastTx(tx weave.Tx) BroadcastTxResponse {
 	return res
 }
 
-func (b *BnsClient) BroadcastTxSync(tx weave.Tx, timeout time.Duration) BroadcastTxResponse {
+func (b *WeaveClient) BroadcastTxSync(tx weave.Tx, timeout time.Duration) BroadcastTxResponse {
 	data, err := tx.Marshal()
 	if err != nil {
 		return BroadcastTxResponse{Error: err}
@@ -264,7 +267,7 @@ func (b *BnsClient) BroadcastTxSync(tx weave.Tx, timeout time.Duration) Broadcas
 	}
 }
 
-func (b *BnsClient) WaitForTxEvent(tx tmtypes.Tx, evtTyp string, timeout time.Duration) (tmtypes.TMEventData, error) {
+func (b *WeaveClient) WaitForTxEvent(tx tmtypes.Tx, evtTyp string, timeout time.Duration) (tmtypes.TMEventData, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 	evts := make(chan interface{}, 1)
@@ -290,7 +293,7 @@ func (b *BnsClient) WaitForTxEvent(tx tmtypes.Tx, evtTyp string, timeout time.Du
 // BroadcastTxAsync can be run in a goroutine and will output
 // the result or error to the given channel.
 // Useful if you want to send many tx in parallel
-func (b *BnsClient) BroadcastTxAsync(tx weave.Tx, out chan<- BroadcastTxResponse) {
+func (b *WeaveClient) BroadcastTxAsync(tx weave.Tx, out chan<- BroadcastTxResponse) {
 	data, err := tx.Marshal()
 	if err != nil {
 		out <- BroadcastTxResponse{Error: err}
@@ -310,7 +313,7 @@ func (b *BnsClient) BroadcastTxAsync(tx weave.Tx, out chan<- BroadcastTxResponse
 // to typecase the events into Headers. Returns a cancel
 // function. If you don't want the automatic goroutine, use
 // Subscribe(QueryNewBlockHeader, out)
-func (b *BnsClient) SubscribeHeaders(out chan<- *Header) (func(), error) {
+func (b *WeaveClient) SubscribeHeaders(out chan<- *Header) (func(), error) {
 	query := QueryNewBlockHeader
 	pipe := make(chan interface{}, 1)
 	cancel, err := b.Subscribe(query, pipe)
@@ -335,7 +338,7 @@ func (b *BnsClient) SubscribeHeaders(out chan<- *Header) (func(), error) {
 // the given channel. If there is no error,
 // returns a cancel function that can be called to cancel
 // the subscription
-func (b *BnsClient) Subscribe(query tmpubsub.Query, out chan<- interface{}) (func(), error) {
+func (b *WeaveClient) Subscribe(query tmpubsub.Query, out chan<- interface{}) (func(), error) {
 	ctx := context.Background()
 	err := b.conn.Subscribe(ctx, b.subscriber, query, out)
 	if err != nil {
@@ -348,7 +351,7 @@ func (b *BnsClient) Subscribe(query tmpubsub.Query, out chan<- interface{}) (fun
 }
 
 // UnsubscribeAll cancels all subscriptions
-func (b *BnsClient) UnsubscribeAll() error {
+func (b *WeaveClient) UnsubscribeAll() error {
 	ctx := context.Background()
 	return b.conn.UnsubscribeAll(ctx, b.subscriber)
 }
@@ -364,7 +367,7 @@ type CurrenciesResponse struct {
 }
 
 // Currencies will returns all currencies configured for the blockchain with their token details.
-func (b *BnsClient) Currencies() (CurrenciesResponse, error) {
+func (b *WeaveClient) Currencies() (CurrenciesResponse, error) {
 	out := CurrenciesResponse{
 		Currencies: make(map[string]currency.TokenInfo),
 	}
@@ -394,7 +397,7 @@ type UserResponse struct {
 // for a given address if it was ever used.
 // If it returns (nil, nil), then this address never signed
 // a transaction before (and can use nonce = 0)
-func (b *BnsClient) GetUser(addr weave.Address) (*UserResponse, error) {
+func (b *WeaveClient) GetUser(addr weave.Address) (*UserResponse, error) {
 	// make sure we send a valid address to the server
 	err := addr.Validate()
 	if err != nil {
