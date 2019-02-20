@@ -10,15 +10,6 @@ import (
 	rpctest "github.com/tendermint/tendermint/rpc/test"
 )
 
-// blocks go by fast, no need to wait seconds....
-func fastWaiter(delta int64) (abort error) {
-	delay := time.Duration(delta) * 5 * time.Millisecond
-	time.Sleep(delay)
-	return nil
-}
-
-var _ client.Waiter = fastWaiter
-
 func TestMainSetup(t *testing.T) {
 	config := rpctest.GetConfig()
 	assert.Equal(t, "SetInTestMain", config.Moniker)
@@ -29,7 +20,7 @@ func TestMainSetup(t *testing.T) {
 	assert.Equal(t, "SetInTestMain", status.NodeInfo.Moniker)
 
 	// wait for some blocks to be produced....
-	client.WaitForHeight(conn, 5, fastWaiter)
+	client.WaitForHeight(conn, 5, FastWaiter)
 	status, err = conn.Status()
 	require.NoError(t, err)
 	assert.True(t, status.SyncInfo.LatestBlockHeight > 4)

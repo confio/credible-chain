@@ -8,38 +8,39 @@ import (
 )
 
 // BuildVoteTx will create an unsigned tx to place a vote
-func BuildVoteTx(identifier, smsCode, transactionID string, vote *votes.Vote) *app.Tx {
+func BuildVoteTx(identifier, smsCode, transactionID string, vote *votes.Vote) (*app.Tx, error) {
 	stamp := time.Now().UTC()
-	return &app.Tx{
-		Sum: &app.Tx_RecordVoteMsg{&votes.VoteRecord{
-			Vote:          vote,
-			Identitifer:   identifier,
-			SmsCode:       smsCode,
-			TransactionId: transactionID,
-			VotedAt:       &stamp,
-		}},
+	msg := &votes.VoteRecord{
+		Vote:          vote,
+		Identitifer:   identifier,
+		SmsCode:       smsCode,
+		TransactionId: transactionID,
+		VotedAt:       &stamp,
 	}
+	if err := msg.Validate(); err != nil {
+		return nil, err
+	}
+	return &app.Tx{Sum: &app.Tx_RecordVoteMsg{msg}}, nil
 }
 
 type Tally = votes.Tally
 
-func (c *CredibleClient) GetTally(option string) (Tally, error) {
-	var out Tally
-
+func (c *CredibleClient) GetTally(option string) (*Tally, error) {
 	resp, err := c.AbciQuery("/tally", []byte(option))
 	if err != nil {
-		return out, err
+		return nil, err
 	}
 	if len(resp.Models) == 0 { // empty list or nil
-		return out, nil
+		return nil, nil
 	}
+
 	// assume only one result
-	model := resp.Models[0]
-	err = out.Unmarshal(model.Value)
-	return out, err
+	var out Tally
+	err = out.Unmarshal(resp.Models[0].Value)
+	return &out, err
 }
 
-func (c *CredibleClient) GetAllTallies(option string) ([]Tally, error) {
+func (c *CredibleClient) GetAllTallies() ([]Tally, error) {
 	resp, err := c.AbciQuery("/tally?prefix", nil)
 	if err != nil {
 		return nil, err

@@ -14,9 +14,10 @@ import (
 	tm "github.com/tendermint/tendermint/types"
 
 	"github.com/iov-one/weave"
+	"github.com/iov-one/weave/crypto"
 
-	// TODO: remove this dependency... but we need something to test against
 	credchain "github.com/confio/credible-chain/app"
+	wc "github.com/confio/credible-chain/weaveclient"
 )
 
 // adjust this to get debug output
@@ -24,14 +25,14 @@ var logger = log.NewNopLogger() // log.NewTMLogger()
 
 // useful values for test cases
 var node *nm.Node
-var notary *PrivateKey
+var notary *crypto.PrivateKey
 
 func getChainID() string {
 	return rpctest.GetConfig().ChainID()
 }
 
 func TestMain(m *testing.M) {
-	notary = GenPrivateKey()
+	notary = wc.GenPrivateKey()
 
 	// TODO: check out config file...
 	config := rpctest.GetConfig()
