@@ -5,18 +5,21 @@ import (
 	"fmt"
 	"net/http"
 
-	client "github.com/confio/credible-chain/client"
 	"github.com/go-chi/chi"
+
+	client "github.com/confio/credible-chain/client"
+	"github.com/iov-one/weave/crypto"
 )
 
 type Application struct {
 	Router  *chi.Mux
 	Client  *client.CredibleClient
+	Key     *crypto.PrivateKey
 	ChainID string
 	Port    int
 }
 
-func NewApplication(remote string, port int) (*Application, error) {
+func NewApplication(key *crypto.PrivateKey, remote string, port int) (*Application, error) {
 	cc := client.NewRemoteClient(remote)
 	chain, err := cc.ChainID()
 	if err != nil {
@@ -24,6 +27,7 @@ func NewApplication(remote string, port int) (*Application, error) {
 	}
 	app := Application{
 		Client:  cc,
+		Key:     key,
 		ChainID: chain,
 		Port:    port,
 	}
@@ -35,7 +39,7 @@ func (a *Application) initRouter() {
 	// Initialise a new router
 	r := chi.NewRouter()
 	r.Get("/", a.GetStatus)
-	// r.Get("/tally", ListTally)
+	r.Get("/tally", a.ListTally)
 	// r.Post("/vote", PostVote)
 
 	// Log and apply to application
@@ -68,6 +72,22 @@ func (a *Application) GetStatus(w http.ResponseWriter, r *http.Request) {
 	}
 	respond(w, status)
 }
+
+func (a *Application) ListTally(w http.ResponseWriter, r *http.Request) {
+	// query tallies for all options
+	tallies, err := a.Client.GetAllTallies()
+	if err != nil {
+		render(w, 500, err.Error())
+	}
+	// convert to a lookup table
+	lookup := make(map[string]int64, len(tallies))
+	for _, t := range tallies {
+		lookup[t.Option] = t.Total
+	}
+	respond(w, lookup)
+}
+
+/***** helpers ****/
 
 func render(w http.ResponseWriter, code int, toRender interface{}) {
 	json, err := json.MarshalIndent(toRender, "", "  ")

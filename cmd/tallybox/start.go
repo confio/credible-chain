@@ -39,13 +39,13 @@ func StartCmd(home string, args []string) error {
 	// load keys
 	filename := notaryPath(home)
 	// privkey, err := wc.LoadPrivateKey(filename)
-	_, err = wc.LoadPrivateKey(filename)
+	key, err := wc.LoadPrivateKey(filename)
 	if err != nil {
 		return fmt.Errorf("Cannot load keys from %s", filename)
 	}
 
 	// connect to remote chain
-	app, err := NewApplication(remote, port)
+	app, err := NewApplication(key, remote, port)
 	if err != nil {
 		return err
 	}
