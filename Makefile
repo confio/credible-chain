@@ -14,9 +14,11 @@ all: deps test install
 install:
 	go install $(BUILD_FLAGS) .
 
+# test never caches and checks for race conditons
 test:
-	go test -race ./...
+	go test -count=1 -race ./...
 
+# tf runs the quick version of the tests
 tf:
 	go test -short ./...
 

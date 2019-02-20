@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:297a3c21bf1d3b4695a222e43e982bb52b4b9e156ca2eadbe32b898d0a1ae551"
+  name = "github.com/asaskevich/govalidator"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "ccb8e960c48f04d6935e72476ae4a51028f9e22f"
+  version = "v9"
+
+[[projects]]
   branch = "master"
   digest = "1:ad4589ec239820ee99eb01c1ad47ebc5f8e02c4f5103a9b210adff9696d89f36"
   name = "github.com/beorn7/perks"
@@ -48,6 +56,17 @@
   pruneopts = "T"
   revision = "07c9b44f60d7ffdfb7d8efe1ad539965737836dc"
   version = "v0.4.0"
+
+[[projects]]
+  digest = "1:aa047c900450fea2242fbb449076eb20cea8278f3b15d2db1950a3c8da8e4308"
+  name = "github.com/go-ozzo/ozzo-validation"
+  packages = [
+    ".",
+    "is",
+  ]
+  pruneopts = "T"
+  revision = "106681dbb37bfa3e7683c4c8129cb7f5925ea3e9"
+  version = "v3.5.0"
 
 [[projects]]
   digest = "1:586ea76dbd0374d6fb649a91d70d652b7fe0ccffb8910a77468e7702e7901f3d"
@@ -126,22 +145,44 @@
   revision = "4030bb1f1f0c35b30ca7009e9ebd06849dd45306"
 
 [[projects]]
+  digest = "1:80f394537967d97fcc0da30762843805c8aaea7d208c43c99d1fe988a8888f0d"
+  name = "github.com/gorilla/websocket"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d"
+  version = "v1.4.0"
+
+[[projects]]
   digest = "1:87f77f79a68c583671d07c8578ae1bc0fce5dbed85effd8fda20af10fbcd1de3"
   name = "github.com/iov-one/weave"
   packages = [
     ".",
     "app",
+    "cmd/bnsd/app",
+    "cmd/bnsd/x/nft/blockchain",
+    "cmd/bnsd/x/nft/bootstrap_node",
+    "cmd/bnsd/x/nft/ticker",
+    "cmd/bnsd/x/nft/username",
     "commands",
     "commands/server",
     "crypto",
     "errors",
+    "gconf",
     "orm",
     "store",
     "store/iavl",
     "x",
+    "x/cash",
+    "x/currency",
+    "x/escrow",
+    "x/hashlock",
     "x/multisig",
+    "x/namecoin",
+    "x/nft",
+    "x/nft/base",
     "x/sigs",
     "x/utils",
+    "x/validators",
   ]
   pruneopts = "T"
   revision = "6d9038b29d51ec10d1c8b5691e4e298e155155e0"
@@ -201,6 +242,7 @@
   packages = [
     "prometheus",
     "prometheus/internal",
+    "prometheus/promhttp",
   ]
   pruneopts = "T"
   revision = "505eaef017263e299324067d40ca2c48f6a2cf50"
@@ -238,6 +280,21 @@
   ]
   pruneopts = "T"
   revision = "f8d8b3f739bd91a7c0462cb55235ef63c79c9abc"
+
+[[projects]]
+  digest = "1:523d2c2500965d035691347a6d30befd53fde95fad16e0b94bef5d3d2cca8ff7"
+  name = "github.com/rcrowley/go-metrics"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "e2704e165165ec55d062f5919b4b29494e9fa790"
+
+[[projects]]
+  digest = "1:a8a03bca5a81878daa4958136f3372af00437c61129ca088a430b0b786b9378a"
+  name = "github.com/rs/cors"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "9a47f48565a795472d43519dd49aac781f3034fb"
+  version = "v1.6.0"
 
 [[projects]]
   digest = "1:17c4ccf5cdb1627aaaeb5c1725cb13aec97b63ea2033d4a6824dcaedf94223dc"
@@ -307,6 +364,8 @@
     "abci/types",
     "blockchain",
     "config",
+    "consensus",
+    "consensus/types",
     "crypto",
     "crypto/ed25519",
     "crypto/encoding/amino",
@@ -315,21 +374,36 @@
     "crypto/multisig/bitarray",
     "crypto/secp256k1",
     "crypto/tmhash",
+    "evidence",
     "libs/autofile",
     "libs/clist",
     "libs/common",
     "libs/db",
+    "libs/events",
     "libs/fail",
     "libs/flowrate",
     "libs/log",
     "libs/pubsub",
     "libs/pubsub/query",
     "mempool",
+    "node",
     "p2p",
     "p2p/conn",
+    "p2p/pex",
+    "privval",
     "proxy",
+    "rpc/client",
+    "rpc/core",
     "rpc/core/types",
+    "rpc/grpc",
+    "rpc/lib/client",
+    "rpc/lib/server",
+    "rpc/lib/types",
+    "rpc/test",
     "state",
+    "state/txindex",
+    "state/txindex/kv",
+    "state/txindex/null",
     "types",
     "types/time",
     "version",
@@ -337,6 +411,17 @@
   pruneopts = "T"
   revision = "4d7b29cd8f8ef998cf8f7141f3a100b0a4fa718d"
   version = "v0.29.1"
+
+[[projects]]
+  digest = "1:50e8a05dc01e5a403ce824cb55449703654035e899baccb64b3759c3c47bfaa6"
+  name = "github.com/tendermint/tmlibs"
+  packages = [
+    "common",
+    "log",
+  ]
+  pruneopts = "T"
+  revision = "1b9b5652a199ab0be2e781393fb275b66377309d"
+  version = "v0.7.0"
 
 [[projects]]
   digest = "1:d470cb69884835b1800e93ceceb85afcf981ea647e61d99398a76af7a95bad6a"
@@ -368,6 +453,7 @@
     "http2/hpack",
     "idna",
     "internal/timeseries",
+    "netutil",
     "trace",
   ]
   pruneopts = "T"
@@ -466,20 +552,35 @@
     "github.com/golang/protobuf/ptypes/timestamp",
     "github.com/iov-one/weave",
     "github.com/iov-one/weave/app",
+    "github.com/iov-one/weave/cmd/bnsd/app",
     "github.com/iov-one/weave/commands",
     "github.com/iov-one/weave/commands/server",
+    "github.com/iov-one/weave/crypto",
     "github.com/iov-one/weave/errors",
+    "github.com/iov-one/weave/gconf",
     "github.com/iov-one/weave/orm",
     "github.com/iov-one/weave/store",
     "github.com/iov-one/weave/store/iavl",
     "github.com/iov-one/weave/x",
+    "github.com/iov-one/weave/x/cash",
+    "github.com/iov-one/weave/x/currency",
     "github.com/iov-one/weave/x/multisig",
     "github.com/iov-one/weave/x/sigs",
     "github.com/iov-one/weave/x/utils",
+    "github.com/pkg/errors",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
     "github.com/tendermint/tendermint/abci/types",
+    "github.com/tendermint/tendermint/config",
+    "github.com/tendermint/tendermint/libs/common",
     "github.com/tendermint/tendermint/libs/log",
+    "github.com/tendermint/tendermint/libs/pubsub",
+    "github.com/tendermint/tendermint/node",
+    "github.com/tendermint/tendermint/rpc/client",
+    "github.com/tendermint/tendermint/rpc/core/types",
+    "github.com/tendermint/tendermint/rpc/test",
+    "github.com/tendermint/tendermint/types",
+    "github.com/tendermint/tmlibs/common",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
