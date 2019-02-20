@@ -37,8 +37,11 @@ You can build a docker image with the current commit (ideally on a tag) with:
 Check the docker image is build properly...
 
 ```shell
-docker images | grep credible
-docker run confio/credible-chain version
+docker images | grep credchain
+docker run confio/credchain version
+
+docker images | grep tallybox
+docker run confio/tallybox version
 ```
 
 ## Running the chain

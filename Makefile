@@ -1,18 +1,15 @@
-.PHONY: all build test image tf protoc clean dist
+.PHONY: all install dist test tf deps tools prototools protoc
 
-BUILD_VERSION ?= $(shell git describe --tags)
-BUILD_FLAGS := -ldflags "-X main.Version=${BUILD_VERSION}"
-DOCKER_BUILD_FLAGS := -a -installsuffix cgo
-BUILDOUT ?= credible-chain
-IMAGE_NAME = "confio/credible-chain"
-IMAGE_VERSION = "confio/credible-chain:${BUILD_VERSION}"
+# this will install and dist in these directories
+# list all executables
+CMDS := cmd/credchain cmd/tallybox
 
 ### Basic
 
 all: deps test install
 
 install:
-	go install $(BUILD_FLAGS) .
+	for d in $(CMDS); do cd $$d && make install && cd -; done
 
 # test never caches and checks for race conditons
 test:
@@ -24,20 +21,10 @@ tf:
 
 ### Docker
 
-dist: clean test build image
-
-build:
-	GOARCH=amd64 CGO_ENABLED=0 GOOS=linux go build $(BUILD_FLAGS) $(DOCKER_BUILD_FLAGS) -o $(BUILDOUT) .
-
-clean:
-	rm -f ${BUILDOUT}
-
-image:
+dist: test
 	@echo "Only builds docker image if all changes have been committed\n"
 	@git diff-index --quiet HEAD
-	docker build --pull -t $(IMAGE_NAME) .
-	docker tag $(IMAGE_NAME) $(IMAGE_VERSION)
-	@echo "Built $(IMAGE_VERSION) as $(IMAGE_NAME):latest"
+	for d in $(CMDS); do cd $$d && make dist && cd -; done
 
 ### Tools
 
