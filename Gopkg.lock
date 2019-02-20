@@ -2,14 +2,6 @@
 
 
 [[projects]]
-  digest = "1:297a3c21bf1d3b4695a222e43e982bb52b4b9e156ca2eadbe32b898d0a1ae551"
-  name = "github.com/asaskevich/govalidator"
-  packages = ["."]
-  pruneopts = "T"
-  revision = "ccb8e960c48f04d6935e72476ae4a51028f9e22f"
-  version = "v9"
-
-[[projects]]
   branch = "master"
   digest = "1:ad4589ec239820ee99eb01c1ad47ebc5f8e02c4f5103a9b210adff9696d89f36"
   name = "github.com/beorn7/perks"
@@ -34,6 +26,14 @@
   version = "v1.1.1"
 
 [[projects]]
+  digest = "1:c9283a02d3388f26e1c0a6596a278a2408be500052926ceddfd7e95786ddae86"
+  name = "github.com/go-chi/chi"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "1a6bb108ccf279c8dac6f9bad857d773b4f9b421"
+  version = "v4.0.1"
+
+[[projects]]
   digest = "1:0b9c3ad6c948d57a379da9c4e1cdd989b1c73ddc5ec8673f52a9539ce60a109b"
   name = "github.com/go-kit/kit"
   packages = [
@@ -56,17 +56,6 @@
   pruneopts = "T"
   revision = "07c9b44f60d7ffdfb7d8efe1ad539965737836dc"
   version = "v0.4.0"
-
-[[projects]]
-  digest = "1:aa047c900450fea2242fbb449076eb20cea8278f3b15d2db1950a3c8da8e4308"
-  name = "github.com/go-ozzo/ozzo-validation"
-  packages = [
-    ".",
-    "is",
-  ]
-  pruneopts = "T"
-  revision = "106681dbb37bfa3e7683c4c8129cb7f5925ea3e9"
-  version = "v3.5.0"
 
 [[projects]]
   digest = "1:586ea76dbd0374d6fb649a91d70d652b7fe0ccffb8910a77468e7702e7901f3d"
@@ -158,11 +147,6 @@
   packages = [
     ".",
     "app",
-    "cmd/bnsd/app",
-    "cmd/bnsd/x/nft/blockchain",
-    "cmd/bnsd/x/nft/bootstrap_node",
-    "cmd/bnsd/x/nft/ticker",
-    "cmd/bnsd/x/nft/username",
     "commands",
     "commands/server",
     "crypto",
@@ -172,17 +156,10 @@
     "store",
     "store/iavl",
     "x",
-    "x/cash",
     "x/currency",
-    "x/escrow",
-    "x/hashlock",
     "x/multisig",
-    "x/namecoin",
-    "x/nft",
-    "x/nft/base",
     "x/sigs",
     "x/utils",
-    "x/validators",
   ]
   pruneopts = "T"
   revision = "6d9038b29d51ec10d1c8b5691e4e298e155155e0"
@@ -545,6 +522,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/go-chi/chi",
     "github.com/gogo/protobuf/gogoproto",
     "github.com/gogo/protobuf/proto",
     "github.com/gogo/protobuf/protoc-gen-gogofaster",
@@ -552,7 +530,6 @@
     "github.com/golang/protobuf/ptypes/timestamp",
     "github.com/iov-one/weave",
     "github.com/iov-one/weave/app",
-    "github.com/iov-one/weave/cmd/bnsd/app",
     "github.com/iov-one/weave/commands",
     "github.com/iov-one/weave/commands/server",
     "github.com/iov-one/weave/crypto",
@@ -562,7 +539,6 @@
     "github.com/iov-one/weave/store",
     "github.com/iov-one/weave/store/iavl",
     "github.com/iov-one/weave/x",
-    "github.com/iov-one/weave/x/cash",
     "github.com/iov-one/weave/x/currency",
     "github.com/iov-one/weave/x/multisig",
     "github.com/iov-one/weave/x/sigs",

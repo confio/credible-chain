@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	client "github.com/confio/credible-chain/client"
 	wc "github.com/confio/credible-chain/weaveclient"
 )
 
@@ -29,7 +28,7 @@ func parseStartFlags(args []string) (string, int, error) {
 // Accepts votes on POST /vote
 // Shows tally on GET /tally
 func StartCmd(home string, args []string) error {
-	remote, _, err := parseStartFlags(args)
+	remote, port, err := parseStartFlags(args)
 	if err != nil {
 		return err
 	}
@@ -46,18 +45,11 @@ func StartCmd(home string, args []string) error {
 	}
 
 	// connect to remote chain
-	cc := client.NewRemoteClient(remote)
-	h, err := cc.Height()
+	app, err := NewApplication(remote, port)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Height: %d\n", h)
-	chain, err := cc.ChainID()
-	if err != nil {
-		return err
-	}
-	fmt.Printf("ChainId: %s\n", chain)
 
 	// start server
-	return nil
+	return app.Serve()
 }
