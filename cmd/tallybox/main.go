@@ -66,7 +66,7 @@ func main() {
 	if err != nil {
 		// fmt.Printf("Error: %+v\n\n", err)
 		fmt.Printf("Error: %v\n\n", err)
-		helpMessage()
+		// helpMessage()
 		os.Exit(1)
 	}
 }

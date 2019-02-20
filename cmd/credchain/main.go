@@ -1,10 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/iov-one/weave/commands"
 	"github.com/iov-one/weave/commands/server"
@@ -63,6 +66,10 @@ func main() {
 		helpMessage()
 	case "init":
 		err = server.InitCmd(app.GenInitOptions, logger, *varHome, rest)
+		if err == nil {
+			// work-around due to genesis time issue
+			err = fixGenesis(filepath.Join(*varHome, "config", "genesis.json"))
+		}
 	case "start":
 		err = server.StartCmd(app.GenerateApp, logger, *varHome, rest)
 	case "getblock":
@@ -79,7 +86,31 @@ func main() {
 
 	if err != nil {
 		fmt.Printf("Error: %+v\n\n", err)
-		helpMessage()
+		// helpMessage()
 		os.Exit(1)
 	}
+}
+
+func fixGenesis(filename string) error {
+	bz, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+
+	var doc map[string]json.RawMessage
+	err = json.Unmarshal(bz, &doc)
+	if err != nil {
+		return err
+	}
+
+	timeJSON, _ := time.Now().UTC().MarshalJSON()
+	fmt.Printf("set genesis time: %s\n", string(timeJSON))
+
+	doc["genesis_time"] = timeJSON
+	out, err := json.MarshalIndent(doc, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(filename, out, 0644)
 }

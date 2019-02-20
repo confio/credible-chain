@@ -54,8 +54,6 @@ Just use `docker run confio/tallybox` instead of `tallybox`
 KEY=$(tallybox keys)
 tendermint init --home=$HOME/.credchain
 credchain init $KEY
-# TODO: fix this workaround
-sed -i 's/\+[0-9][0-9]:[0-9][0-9]/Z/' ~/.credchain/config/genesis.json
 ```
 
 ## Running the chain
