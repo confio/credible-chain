@@ -7,13 +7,13 @@ import (
 	"fmt"
 	"path/filepath"
 
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/libs/log"
+
 	"github.com/iov-one/weave"
 	"github.com/iov-one/weave/app"
 	"github.com/iov-one/weave/gconf"
 	"github.com/iov-one/weave/x/multisig"
-
-	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/libs/log"
 )
 
 // GenInitOptions will produce empty structure to fill in

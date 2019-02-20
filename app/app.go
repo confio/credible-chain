@@ -18,6 +18,8 @@ import (
 	"github.com/iov-one/weave/x/multisig"
 	"github.com/iov-one/weave/x/sigs"
 	"github.com/iov-one/weave/x/utils"
+
+	"github.com/confio/credible-chain/x/votes"
 )
 
 // Authenticator returns the typical authentication,
@@ -48,6 +50,7 @@ func Chain(authFn x.Authenticator) app.Decorators {
 func Router(authFn x.Authenticator) app.Router {
 	r := app.NewRouter()
 	multisig.RegisterRoutes(r, authFn)
+	votes.RegisterRoutes(r, authFn)
 	return r
 }
 
@@ -59,6 +62,7 @@ func QueryRouter() weave.QueryRouter {
 		sigs.RegisterQuery,
 		multisig.RegisterQuery,
 		orm.RegisterQuery,
+		votes.RegisterQuery,
 	)
 	return r
 }
