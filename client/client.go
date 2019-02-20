@@ -18,6 +18,8 @@ import (
 	"github.com/iov-one/weave/app"
 	"github.com/iov-one/weave/x/currency"
 	"github.com/iov-one/weave/x/sigs"
+
+	"github.com/confio/credible-chain/x/votes"
 )
 
 type Header = tmtypes.Header
@@ -31,10 +33,11 @@ var QueryNewBlockHeader = tmtypes.EventQueryNewBlockHeader
 // Client is an interface to interact with bcp
 type Client interface {
 	GetUser(addr weave.Address) (*UserResponse, error)
-	// GetWallet(addr weave.Address) (*WalletResponse, error)
 	BroadcastTx(tx weave.Tx) BroadcastTxResponse
 	BroadcastTxAsync(tx weave.Tx, out chan<- BroadcastTxResponse)
 	BroadcastTxSync(tx weave.Tx, timeout time.Duration) BroadcastTxResponse
+	GetTally(option string) (Tally, error)
+	GetAllTallies(option string) ([]Tally, error)
 }
 
 // BnsClient is a tendermint client wrapped to provide
@@ -44,6 +47,8 @@ type BnsClient struct {
 	// subscriber is a unique identifier for subscriptions
 	subscriber string
 }
+
+var _ Client = (*BnsClient)(nil)
 
 // NewClient wraps a BnsClient around an existing
 // tendermint client connection.
@@ -350,6 +355,57 @@ func (b *BnsClient) Subscribe(query tmpubsub.Query, out chan<- interface{}) (fun
 func (b *BnsClient) UnsubscribeAll() error {
 	ctx := context.Background()
 	return b.conn.UnsubscribeAll(ctx, b.subscriber)
+}
+
+type Tally = votes.Tally
+
+func (b *BnsClient) GetTally(option string) (Tally, error) {
+	var out Tally
+
+	resp, err := b.AbciQuery("/tally", []byte(option))
+	if err != nil {
+		return out, err
+	}
+	if len(resp.Models) == 0 { // empty list or nil
+		return out, nil
+	}
+	// assume only one result
+	model := resp.Models[0]
+	err = out.Unmarshal(model.Value)
+	return out, err
+}
+
+func (b *BnsClient) GetAllTallies(option string) ([]Tally, error) {
+	resp, err := b.AbciQuery("/tally?prefix", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var out = make([]Tally, len(resp.Models))
+	for i := range out {
+		err = out[i].Unmarshal(resp.Models[i].Value)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return out, nil
+}
+
+type VoteRecord = votes.VoteRecord
+
+func (b *BnsClient) GetVote(identifier string) (*VoteRecord, error) {
+	resp, err := b.AbciQuery("/vote", []byte(identifier))
+	if err != nil {
+		return nil, err
+	}
+	if len(resp.Models) == 0 { // empty list or nil
+		return nil, nil
+	}
+
+	// assume only one result
+	var out VoteRecord
+	err = out.Unmarshal(resp.Models[0].Value)
+	return &out, err
 }
 
 // // GetWallet will return a wallet given an address
