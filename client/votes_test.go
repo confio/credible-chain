@@ -109,7 +109,7 @@ func TestOneVote(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, n2, n+1)
 
-	// let's go check the vote was proper
+	// let's go check the tally was updated
 	fmain, err := cc.GetTally(main)
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, fmain.Total)
@@ -118,4 +118,9 @@ func TestOneVote(t *testing.T) {
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, frep.Total)
 	assert.Equal(t, rep, frep.Option)
+
+	// and we should be able to find the vote by id
+	voted, err := cc.GetVote(identifier)
+	require.NoError(t, err)
+	assert.EqualValues(t, vote, voted.Vote)
 }
