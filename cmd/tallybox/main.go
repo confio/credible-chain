@@ -8,9 +8,7 @@ import (
 )
 
 const (
-	flagHome   = "home"
-	flagRemote = "remote"
-	flagPort   = "port"
+	flagHome = "home"
 )
 
 var (
@@ -41,9 +39,6 @@ func helpMessage() {
 }
 
 func main() {
-	// logger := log.NewTMLogger(log.NewSyncWriter(os.Stdout)).
-	// 	With("module", "tallybox")
-
 	flag.Parse()
 	if flag.NArg() == 0 {
 		fmt.Println("Missing command:")
@@ -52,7 +47,7 @@ func main() {
 	}
 
 	cmd := flag.Arg(0)
-	// rest := flag.Args()[1:]
+	rest := flag.Args()[1:]
 
 	var err error
 	switch cmd {
@@ -60,8 +55,8 @@ func main() {
 		helpMessage()
 	case "keys":
 		err = KeysCmd(*varHome)
-	// case "start":
-	// 	err = server.StartCmd(app.GenerateApp, logger, *varHome, rest)
+	case "start":
+		err = StartCmd(*varHome, rest)
 	case "version":
 		fmt.Println(Version)
 	default:
@@ -69,7 +64,8 @@ func main() {
 	}
 
 	if err != nil {
-		fmt.Printf("Error: %+v\n\n", err)
+		// fmt.Printf("Error: %+v\n\n", err)
+		fmt.Printf("Error: %v\n\n", err)
 		helpMessage()
 		os.Exit(1)
 	}

@@ -52,12 +52,25 @@ Just use `docker run confio/tallybox` instead of `tallybox`
 
 ```shell
 KEY=$(tallybox keys)
+tendermint init --home=$HOME/.credchain
 credchain init $KEY
+# TODO: fix this workaround
+sed -i 's/\+[0-9][0-9]:[0-9][0-9]/Z/' ~/.credchain/config/genesis.json
 ```
 
 ## Running the chain
 
-**TODO**
+TODO: debug
+```shell
+tendermint node --home=$HOME/.credchain --proxy_app=tcp://localhost:11111 > tendermint.log &
+credchain start -bind=tcp://localhost:11111 > credchain.log & 
+```
+
+## Running the server
+
+```shell
+tallybox start -port=5005 -remote=http://localhost:26657
+```
 
 ## Blockchain Design
 

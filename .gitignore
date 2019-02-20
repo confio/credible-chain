@@ -1,3 +1,4 @@
 vendor/
 cmd/credchain/credchain
 cmd/tallybox/tallybox
+*.log

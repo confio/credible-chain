@@ -16,7 +16,7 @@ func KeysCmd(home string) error {
 	if err != nil {
 		return err
 	}
-	filename := filepath.Join(home, "notary.pk")
+	filename := notaryPath(home)
 	privkey, err := wc.LoadPrivateKey(filename)
 	if err != nil {
 		privkey = wc.GenPrivateKey()
@@ -25,6 +25,10 @@ func KeysCmd(home string) error {
 			return err
 		}
 	}
-	fmt.Printf("%s", privkey.PublicKey().Address())
+	fmt.Printf("%s\n", privkey.PublicKey().Address())
 	return nil
+}
+
+func notaryPath(home string) string {
+	return filepath.Join(home, "notary.pk")
 }
