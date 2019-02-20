@@ -1,33 +1,16 @@
 package client
 
 import (
-	"time"
-
 	"github.com/iov-one/weave"
 	"github.com/iov-one/weave/x/sigs"
 
 	app "github.com/confio/credible-chain/app"
-	"github.com/confio/credible-chain/x/votes"
 )
 
 // Tx is all the interfaces we need rolled into one
 type Tx interface {
 	weave.Tx
 	sigs.SignedTx
-}
-
-// BuildVoteTx will create an unsigned tx to place a vote
-func BuildVoteTx(identifier, smsCode, transactionID string, vote *votes.Vote) *app.Tx {
-	stamp := time.Now().UTC()
-	return &app.Tx{
-		Sum: &app.Tx_RecordVoteMsg{&votes.VoteRecord{
-			Vote:          vote,
-			Identitifer:   identifier,
-			SmsCode:       smsCode,
-			TransactionId: transactionID,
-			VotedAt:       &stamp,
-		}},
-	}
 }
 
 // SignTx modifies the tx in-place, adding signatures
