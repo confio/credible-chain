@@ -1,3 +1,3 @@
 vendor/
-credchain
-tallybox
+cmd/credchain/credchain
+cmd/tallybox/tallybox

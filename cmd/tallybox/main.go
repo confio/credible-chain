@@ -10,11 +10,11 @@ import (
 const (
 	flagHome   = "home"
 	flagRemote = "remote"
+	flagPort   = "port"
 )
 
 var (
-	varHome   *string
-	varRemote *string
+	varHome *string
 
 	// Version should be set by build flags: `git describe --tags`
 	Version = "please set in makefile"
@@ -58,8 +58,8 @@ func main() {
 	switch cmd {
 	case "help":
 		helpMessage()
-	// case "keys":
-	// 	err = server.InitCmd(app.GenInitOptions, logger, *varHome, rest)
+	case "keys":
+		err = KeysCmd(*varHome)
 	// case "start":
 	// 	err = server.StartCmd(app.GenerateApp, logger, *varHome, rest)
 	case "version":

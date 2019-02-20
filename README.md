@@ -44,6 +44,17 @@ docker images | grep tallybox
 docker run confio/tallybox version
 ```
 
+## Set up the system
+
+We need to set this up with some keys in order to initialize the blockchain properly.
+We will assume you have the binaries installed, but it works the same with docker...
+Just use `docker run confio/tallybox` instead of `tallybox`
+
+```shell
+KEY=$(tallybox keys)
+credchain init $KEY
+```
+
 ## Running the chain
 
 **TODO**
