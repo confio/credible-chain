@@ -44,7 +44,7 @@ func (p *Pipeline) Run(tasks <-chan *Task) <-chan *Task {
 	out := make(chan *Task, 1)
 
 	go signTx(p.key, p.nonce, p.chainID, tasks, p.toSend)
-	go sendTx(p.client, p.toSend, p.awaitResponse)
+	go sendTx(p.client, p.nonce, p.toSend, p.awaitResponse)
 	go getResponse(p.awaitResponse, out)
 
 	return out
@@ -79,7 +79,7 @@ func doSignTx(key *crypto.PrivateKey, nonce *wc.Nonce, chainID string, task *Tas
 	return task
 }
 
-func sendTx(client *client.CredibleClient, in <-chan *Task, out chan<- *Task) {
+func sendTx(client *client.CredibleClient, nonce *wc.Nonce, in <-chan *Task, out chan<- *Task) {
 	for {
 		task, more := <-in
 		// end when input is closed
@@ -93,7 +93,13 @@ func sendTx(client *client.CredibleClient, in <-chan *Task, out chan<- *Task) {
 			continue
 		}
 		task.Response = make(chan wc.BroadcastTxResponse)
-		client.BroadcastAsyncWithCheck(task.Tx, CommitTimeout, task.Response)
+		err := client.BroadcastAsyncWithCheck(task.Tx, CommitTimeout, task.Response)
+		if err != nil {
+			task.Error = err
+			// this means we didn't update the nonce, force a reset from the chain
+			// TODO: think about how singing and sending are separated, maybe combine them???
+			nonce.ClearCache()
+		}
 		out <- task
 	}
 }

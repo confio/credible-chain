@@ -112,6 +112,15 @@ func (n *Nonce) Next() (int64, error) {
 	return result, nil
 }
 
+// ClearCache removes cached values, so the next call to Next will
+// check against reality in the blockchain
+func (n *Nonce) ClearCache() {
+	n.mutex.Lock()
+	n.nonce = 0
+	n.fromQuery = false
+	n.mutex.Unlock()
+}
+
 //************ generic (weave) functionality *************//
 
 // Status will return the raw status from the node
@@ -232,25 +241,24 @@ func (b *WeaveClient) BroadcastTx(tx weave.Tx) BroadcastTxResponse {
 }
 
 // BroadcastAsyncWithCheck will ensure the transaction passes broadcast_tx_sync (CheckTx)
-// before returning. It will write the success/error to the given channel when available
-// (which may be before returning in case of error).
+// before returning.
+// If CheckTx fails it will return an error
+// If that passes, it will return nil, and a Response will be sent to the channel later
+//
 // You can call this many times in a loop, with short delay for each call, but a guarantee the
 // messages all arrive in order
-func (b *WeaveClient) BroadcastAsyncWithCheck(tx weave.Tx, timeout time.Duration, out chan<- BroadcastTxResponse) {
+func (b *WeaveClient) BroadcastAsyncWithCheck(tx weave.Tx, timeout time.Duration, out chan<- BroadcastTxResponse) error {
 	data, err := tx.Marshal()
 	if err != nil {
-		out <- BroadcastTxResponse{Error: err}
-		return
+		return err
 	}
 
 	res, err := b.conn.BroadcastTxSync(data)
 	if err != nil {
-		out <- BroadcastTxResponse{Error: err}
-		return
+		return err
 	}
 	if res.Code != 0 {
-		out <- BroadcastTxResponse{Error: errors.WithMessage(fmt.Errorf("CheckTx failed with code %d", res.Code), res.Log)}
-		return
+		return errors.WithMessage(fmt.Errorf("CheckTx failed with code %d", res.Code), res.Log)
 	}
 
 	// and wait for confirmation in a goroutine
@@ -277,6 +285,8 @@ func (b *WeaveClient) BroadcastAsyncWithCheck(tx weave.Tx, timeout time.Duration
 			},
 		}
 	}()
+
+	return nil
 }
 
 func (b *WeaveClient) BroadcastTxSync(tx weave.Tx, timeout time.Duration) BroadcastTxResponse {
@@ -331,7 +341,10 @@ func (b *WeaveClient) WaitForTxEvent(tx tmtypes.Tx, evtTyp string, timeout time.
 	defer b.conn.UnsubscribeAll(ctx, uuid)
 
 	select {
-	case evt := <-evts:
+	case evt, ok := <-evts:
+		if !ok {
+			return nil, errors.New("Socket closed")
+		}
 		return evt.(tmtypes.TMEventData), nil
 	case <-ctx.Done():
 		return nil, errors.New("timed out waiting for event")
