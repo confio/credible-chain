@@ -5,16 +5,21 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/confio/credible-chain/x/votes"
+
 	"github.com/go-chi/chi"
 
-	client "github.com/confio/credible-chain/client"
 	"github.com/iov-one/weave/crypto"
+
+	client "github.com/confio/credible-chain/client"
+	"github.com/confio/credible-chain/queue"
 )
 
 type Application struct {
 	Router  *chi.Mux
 	Client  *client.CredibleClient
 	Key     *crypto.PrivateKey
+	Queue   *queue.Queue
 	ChainID string
 	Port    int
 }
@@ -40,7 +45,7 @@ func (a *Application) initRouter() {
 	r := chi.NewRouter()
 	r.Get("/", a.GetStatus)
 	r.Get("/tally", a.ListTally)
-	// r.Post("/vote", PostVote)
+	r.Post("/vote", a.PostVote)
 
 	// Log and apply to application
 	// Log(LogModuleStartup, true, "Router initialised OK", nil)
@@ -48,29 +53,39 @@ func (a *Application) initRouter() {
 }
 
 func (a *Application) Serve() error {
+	// start queue and pipeline here
+	p, err := queue.NewPipeline(a.Client, a.Key)
+	if err != nil {
+		return err
+	}
+	a.Queue = queue.NewQueue(500)
+	// start the queue in the backround, and serve
+	go a.Queue.Run(p)
 	return http.ListenAndServe(fmt.Sprintf(":%d", a.Port), a.Router)
 }
 
-// func ListCharities(w http.ResponseWriter, r *http.Request) {
-// 	respond(w, app.Data.Charities)
-// }
-
-// func ListRecentVotes(w http.ResponseWriter, r *http.Request) {
-// 	votes, err := getRecentVotes()
-// 	if err != nil {
-// 		respondWithError(w, errorTypeDatabase, err)
-// 		return
-// 	}
-
-// 	respond(w, votes)
-// }
-
-func (a *Application) GetStatus(w http.ResponseWriter, r *http.Request) {
-	status, err := a.Client.Status()
+func (a *Application) PostVote(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	var vr votes.VoteRecord
+	err := decoder.Decode(&vr)
 	if err != nil {
 		render(w, 500, err.Error())
+		return
 	}
-	respond(w, status)
+
+	// Make take
+	task := queue.Task{Vote: &vr}
+	err = a.Queue.Push(&task)
+	if err != nil {
+		render(w, 500, err.Error())
+		return
+	}
+	respond(w, "Accepted")
+}
+
+func (a *Application) GetStatus(w http.ResponseWriter, r *http.Request) {
+	stats := a.Queue.Stats()
+	respond(w, stats)
 }
 
 func (a *Application) ListTally(w http.ResponseWriter, r *http.Request) {

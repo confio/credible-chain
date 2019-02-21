@@ -4,16 +4,12 @@ import (
 	"sync/atomic"
 
 	app "github.com/confio/credible-chain/app"
-	"github.com/confio/credible-chain/client"
 	wc "github.com/confio/credible-chain/weaveclient"
 	"github.com/confio/credible-chain/x/votes"
 )
 
-const QueueSize = 500
-
 type Queue struct {
-	client *client.CredibleClient
-	input  chan *Task
+	input chan *Task
 
 	entered  int64
 	errored  int64
@@ -49,10 +45,9 @@ type Worker interface {
 	Run(tasks <-chan *Task) <-chan *Task
 }
 
-func NewQueue(client *client.CredibleClient) *Queue {
+func NewQueue(queueSize int) *Queue {
 	q := &Queue{
-		client: client,
-		input:  make(chan *Task, QueueSize),
+		input: make(chan *Task, queueSize),
 	}
 	return q
 }
