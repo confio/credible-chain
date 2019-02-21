@@ -58,7 +58,6 @@ credchain init $KEY
 
 ## Running the chain
 
-TODO: debug
 ```shell
 tendermint node --home=$HOME/.credchain --proxy_app=tcp://localhost:11111 > tendermint.log &
 credchain start -bind=tcp://localhost:11111 > credchain.log & 

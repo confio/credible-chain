@@ -231,6 +231,54 @@ func (b *WeaveClient) BroadcastTx(tx weave.Tx) BroadcastTxResponse {
 	return res
 }
 
+// BroadcastAsyncWithCheck will ensure the transaction passes broadcast_tx_sync (CheckTx)
+// before returning. It will write the success/error to the given channel when available
+// (which may be before returning in case of error).
+// You can call this many times in a loop, with short delay for each call, but a guarantee the
+// messages all arrive in order
+func (b *WeaveClient) BroadcastAsyncWithCheck(tx weave.Tx, timeout time.Duration, out chan<- BroadcastTxResponse) {
+	data, err := tx.Marshal()
+	if err != nil {
+		out <- BroadcastTxResponse{Error: err}
+		return
+	}
+
+	res, err := b.conn.BroadcastTxSync(data)
+	if err != nil {
+		out <- BroadcastTxResponse{Error: err}
+		return
+	}
+	if res.Code != 0 {
+		out <- BroadcastTxResponse{Error: errors.WithMessage(fmt.Errorf("CheckTx failed with code %d", res.Code), res.Log)}
+		return
+	}
+
+	// and wait for confirmation in a goroutine
+	go func() {
+		evt, err := b.WaitForTxEvent(data, tmtypes.EventTx, timeout)
+		if err != nil {
+			out <- BroadcastTxResponse{Error: err}
+			return
+		}
+
+		txe, ok := evt.(tmtypes.EventDataTx)
+		if !ok {
+			if err != nil {
+				out <- BroadcastTxResponse{Error: fmt.Errorf("WaitForOneEvent did not return an EventDataTx object")}
+				return
+			}
+		}
+
+		out <- BroadcastTxResponse{
+			Response: &ctypes.ResultBroadcastTxCommit{
+				DeliverTx: txe.Result,
+				Height:    txe.Height,
+				Hash:      txe.Tx.Hash(),
+			},
+		}
+	}()
+}
+
 func (b *WeaveClient) BroadcastTxSync(tx weave.Tx, timeout time.Duration) BroadcastTxResponse {
 	data, err := tx.Marshal()
 	if err != nil {
