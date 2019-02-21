@@ -58,7 +58,6 @@ func (q *Queue) Push(task *Task) error {
 	if err := task.Validate(); err != nil {
 		return err
 	}
-	fmt.Println("Add entered")
 	atomic.AddInt64(&q.entered, 1)
 	q.input <- task
 	return nil
@@ -74,7 +73,6 @@ func (q *Queue) Run(worker Worker) {
 		if !more {
 			return
 		}
-		fmt.Println("Task completed")
 		q.done(task)
 	}
 	fmt.Println("Run finished")
@@ -95,11 +93,9 @@ func (q *Queue) Stats() Stats {
 
 func (q *Queue) done(task *Task) {
 	if task.Error != nil {
-		fmt.Println("Add error")
 		// TODO: mark which one it was for retry
 		atomic.AddInt64(&q.errored, 1)
 	} else {
-		fmt.Println("Add finished")
 		atomic.AddInt64(&q.finished, 1)
 	}
 }

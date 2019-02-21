@@ -25,7 +25,10 @@ type Application struct {
 }
 
 func NewApplication(key *crypto.PrivateKey, remote string, port int) (*Application, error) {
-	cc := client.NewRemoteClient(remote)
+	cc, err := client.NewRemoteClient(remote)
+	if err != nil {
+		return nil, err
+	}
 	chain, err := cc.ChainID()
 	if err != nil {
 		return nil, err

@@ -17,8 +17,13 @@ func NewLocalClient(n *tmnode.Node) *CredibleClient {
 	return &CredibleClient{weave}
 }
 
-func NewRemoteClient(url string) *CredibleClient {
+func NewRemoteClient(url string) (*CredibleClient, error) {
 	conn := wc.NewHTTPConnection(url)
+	// we must start it to enable websocket subscriptions
+	err := conn.Start()
+	if err != nil {
+		return nil, err
+	}
 	weave := wc.NewClient(conn)
-	return &CredibleClient{weave}
+	return &CredibleClient{weave}, nil
 }
