@@ -20,9 +20,9 @@ func TestVoteTx(t *testing.T) {
 
 	// TODO: make the validation less strict
 	vote := &votes.Vote{
-		MainVote:  "A",
-		RepVote:   "BRDX1",
-		Charity:   "ABC",
+		MainVote:  1,
+		RepVote:   "BR1",
+		Charity:   "AB",
 		PostCode:  "SW16",
 		BirthYear: 1980,
 		Donation:  100,
@@ -71,11 +71,12 @@ func TestOneVote(t *testing.T) {
 	require.NoError(t, err)
 
 	// let's submit one vote
-	main := "Z"
-	rep := "FOOD7"
+	var main int32 = 3
+	rep := "FOO"
 
 	// assert both are empty now
-	imain, err := cc.GetTally(main)
+	mainTally := votes.VoteToString(main)
+	imain, err := cc.GetTally(mainTally)
 	assert.NoError(t, err)
 	assert.Nil(t, imain)
 	irep, err := cc.GetTally(rep)
@@ -85,7 +86,7 @@ func TestOneVote(t *testing.T) {
 	vote := &votes.Vote{
 		MainVote:  main,
 		RepVote:   rep,
-		Charity:   "DEF",
+		Charity:   "AL",
 		PostCode:  "NE11",
 		BirthYear: 1987,
 		Donation:  200,
@@ -110,10 +111,10 @@ func TestOneVote(t *testing.T) {
 	assert.Equal(t, n2, n+1)
 
 	// let's go check the tally was updated
-	fmain, err := cc.GetTally(main)
+	fmain, err := cc.GetTally(mainTally)
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, fmain.Total)
-	assert.Equal(t, main, fmain.Option)
+	assert.Equal(t, mainTally, fmain.Option)
 	frep, err := cc.GetTally(rep)
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, frep.Total)

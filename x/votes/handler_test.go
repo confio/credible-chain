@@ -29,7 +29,7 @@ func randString(len int) string {
 	return common.RandStr(len)
 }
 
-func mustBuildVote(mainVote, repVote, charity, postCode string, birth, donation int32, id string) *VoteRecord {
+func mustBuildVote(mainVote int32, repVote, charity, postCode string, birth, donation int32, id string) *VoteRecord {
 	res := buildVote(mainVote, repVote, charity, postCode, birth, donation, id)
 	if err := res.Validate(); err != nil {
 		panic(err)
@@ -37,7 +37,7 @@ func mustBuildVote(mainVote, repVote, charity, postCode string, birth, donation 
 	return res
 }
 
-func buildVote(mainVote, repVote, charity, postCode string, birth, donation int32, id string) *VoteRecord {
+func buildVote(mainVote int32, repVote, charity, postCode string, birth, donation int32, id string) *VoteRecord {
 	vote := &Vote{
 		MainVote:  mainVote,
 		RepVote:   repVote,
@@ -81,16 +81,18 @@ func TestRecordVoteHandler(t *testing.T) {
 	_, us := helper.MakeKey()
 	_, them := helper.MakeKey()
 
-	rep1 := "SOME1"
-	rep2 := "ELSE4"
+	rep1 := "SOM"
+	rep2 := "ELS"
+
+	tallyOpt := func(i int32) []byte { return []byte(VoteToString(i)) }
 
 	// this is for over-writing
-	vote1 := mustBuildVote("A", rep1, "HLP", "SW87", 1991, 100, "")
+	vote1 := mustBuildVote(1, rep1, "HP", "SW87", 1991, 100, "")
 	id1 := vote1.Identitifer
-	vote1b := mustBuildVote("B", rep2, "FOO", "SW87", 1991, 100, id1)
+	vote1b := mustBuildVote(2, rep2, "F7", "SW87", 1991, 100, id1)
 
 	// this is for addition
-	vote2 := mustBuildVote("A", rep2, "MRE", "B18", 1980, 500, "")
+	vote2 := mustBuildVote(1, rep2, "MR", "B18", 1980, 500, "")
 	id2 := vote2.Identitifer
 
 	cases := map[string]struct {
@@ -107,35 +109,35 @@ func TestRecordVoteHandler(t *testing.T) {
 				},
 			},
 		},
-		"rejects invalid votes": {
+		"rejects invalid ": {
 			actions: []action{
 				{
 					conditions:     []weave.Condition{us},
-					msg:            buildVote("APE", rep1, "HLP", "SW87", 1991, 100, ""),
+					msg:            buildVote(5, rep1, "HLP", "SW87", 1991, 100, ""),
 					wantCheckErr:   true,
 					wantDeliverErr: true,
 				},
 				{
 					conditions:     []weave.Condition{us},
-					msg:            buildVote("A", "NOONE", "HLP", "SW87", 1991, 100, ""),
+					msg:            buildVote(1, "NOONE", "HLP", "SW87", 1991, 100, ""),
 					wantCheckErr:   true,
 					wantDeliverErr: true,
 				},
 				{
 					conditions:     []weave.Condition{us},
-					msg:            buildVote("A", rep1, "HLP", "SW87", 91, 100, ""),
+					msg:            buildVote(2, rep1, "HLP", "SW87", 91, 100, ""),
 					wantCheckErr:   true,
 					wantDeliverErr: true,
 				},
 				{
 					conditions:     []weave.Condition{us},
-					msg:            buildVote("A", rep1, "HLP", "SW87", 2010, 100, ""),
+					msg:            buildVote(3, rep1, "HLP", "SW87", 2010, 100, ""),
 					wantCheckErr:   true,
 					wantDeliverErr: true,
 				},
 				{
 					conditions:     []weave.Condition{us},
-					msg:            buildVote("A", rep1, "HLP", "SW87 K23", 1986, 100, ""),
+					msg:            buildVote(1, rep1, "HLP", "SW87 K23", 1986, 100, ""),
 					wantCheckErr:   true,
 					wantDeliverErr: true,
 				},
@@ -159,10 +161,10 @@ func TestRecordVoteHandler(t *testing.T) {
 				},
 				{
 					path:   "/tally",
-					data:   []byte("A"),
+					data:   tallyOpt(1),
 					bucket: tallyBucket.Bucket,
 					wantRes: []orm.Object{
-						buildTally("A", 1),
+						buildTally(VoteToString(1), 1),
 					},
 				},
 				{
@@ -178,8 +180,8 @@ func TestRecordVoteHandler(t *testing.T) {
 					mod:    "prefix",
 					bucket: tallyBucket.Bucket,
 					wantRes: []orm.Object{
-						buildTally("A", 1),
 						buildTally(rep1, 1),
+						buildTally(VoteToString(1), 1),
 					},
 				},
 			},
@@ -206,10 +208,10 @@ func TestRecordVoteHandler(t *testing.T) {
 				},
 				{
 					path:   "/tally",
-					data:   []byte("B"),
+					data:   tallyOpt(2),
 					bucket: tallyBucket.Bucket,
 					wantRes: []orm.Object{
-						buildTally("B", 1),
+						buildTally(VoteToString(2), 1),
 					},
 				},
 				{
@@ -225,10 +227,10 @@ func TestRecordVoteHandler(t *testing.T) {
 					mod:    "prefix",
 					bucket: tallyBucket.Bucket,
 					wantRes: []orm.Object{
-						buildTally("A", 0),
-						buildTally("B", 1),
 						buildTally(rep2, 1),
 						buildTally(rep1, 0),
+						buildTally(VoteToString(1), 0),
+						buildTally(VoteToString(2), 1),
 					},
 				},
 			},
@@ -263,10 +265,10 @@ func TestRecordVoteHandler(t *testing.T) {
 				},
 				{
 					path:   "/tally",
-					data:   []byte("A"),
+					data:   tallyOpt(1),
 					bucket: tallyBucket.Bucket,
 					wantRes: []orm.Object{
-						buildTally("A", 2),
+						buildTally(VoteToString(1), 2),
 					},
 				},
 				{
@@ -274,9 +276,9 @@ func TestRecordVoteHandler(t *testing.T) {
 					mod:    "prefix",
 					bucket: tallyBucket.Bucket,
 					wantRes: []orm.Object{
-						buildTally("A", 2),
 						buildTally(rep2, 1),
 						buildTally(rep1, 1),
+						buildTally(VoteToString(1), 2),
 					},
 				},
 			},

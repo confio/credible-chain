@@ -6,9 +6,9 @@ import "google/protobuf/timestamp.proto";
 import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 
 message Vote {
-    string main_vote = 1;  // 1 letter (A, B, C)
-    string rep_vote = 2;   // 4 letter + 1 digit
-    string charity = 3;   // 3 letter
+    int32 main_vote = 1;  // 1 digit (1, 2, 3)
+    string rep_vote = 2;   // 3 characters - default "NIL"
+    string charity = 3;   // 2 characters - default "AL"
     string postCode = 4;  // 3-4 chars
     int32 birth_year = 5;
     int32 donation = 6; // Amount in Pence

@@ -2,6 +2,7 @@ package votes
 
 import (
 	"encoding/hex"
+	fmt "fmt"
 
 	"github.com/iov-one/weave"
 	"github.com/iov-one/weave/errors"
@@ -83,7 +84,7 @@ func (h *recordVoteHandler) Deliver(ctx weave.Context, db weave.KVStore, tx weav
 
 	// let's update the tallies
 	if existing != nil {
-		err = h.subtractTally(db, existing.Vote.MainVote)
+		err = h.subtractTally(db, VoteToString(existing.Vote.MainVote))
 		if err != nil {
 			return res, err
 		}
@@ -92,7 +93,7 @@ func (h *recordVoteHandler) Deliver(ctx weave.Context, db weave.KVStore, tx weav
 			return res, err
 		}
 	}
-	err = h.addTally(db, msg.Vote.MainVote)
+	err = h.addTally(db, VoteToString(msg.Vote.MainVote))
 	if err != nil {
 		return res, err
 	}
@@ -153,4 +154,9 @@ func (h *recordVoteHandler) getNotary(db weave.KVStore) weave.Address {
 		panic(err)
 	}
 	return addr
+}
+
+// VoteToString retuns a string representation for the main vote
+func VoteToString(mainVote int32) string {
+	return fmt.Sprintf("main%d", mainVote)
 }

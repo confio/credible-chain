@@ -29,14 +29,23 @@ func (m *VoteRecord) Validate() error {
 	if m == nil {
 		return errors.ErrInternal("VoteRecord is <nil>")
 	}
-	if len(m.Identitifer) < 5 || len(m.Identitifer) > 100 {
-		return errors.ErrInternal("Unexpected size for Identifier")
+	if len(m.Identitifer) == 0 {
+		return errors.ErrInternal("Missing Identifier")
 	}
-	if len(m.SmsCode) < 5 || len(m.SmsCode) > 100 {
-		return errors.ErrInternal("Unexpected size for sms code")
+	if len(m.Identitifer) > 100 {
+		return errors.ErrInternal("Identifier too long")
 	}
-	if len(m.TransactionId) < 5 || len(m.TransactionId) > 100 {
-		return errors.ErrInternal("Unexpected size for transaction id")
+	if len(m.SmsCode) == 0 {
+		return errors.ErrInternal("Missing sms code")
+	}
+	if len(m.SmsCode) > 100 {
+		return errors.ErrInternal("sms code to long")
+	}
+	if len(m.TransactionId) == 0 {
+		return errors.ErrInternal("Missing transaction id")
+	}
+	if len(m.TransactionId) > 100 {
+		return errors.ErrInternal("transaction id to long")
 	}
 	if m.VotedAt == nil || m.VotedAt.Before(time.Date(2019, 2, 15, 12, 0, 0, 0, time.UTC)) {
 		return errors.ErrInternal("Need reasonable voted_at time")
@@ -49,14 +58,14 @@ func (m *Vote) Validate() error {
 	if m == nil {
 		return errors.ErrInternal("Vote is <nil>")
 	}
-	if len(m.MainVote) != 1 || !isAlpha.MatchString(m.MainVote) {
+	if m.MainVote != 1 && m.MainVote != 2 && m.MainVote != 3 {
 		return errors.ErrInternal("MainVote must be 1 character")
 	}
-	if len(m.RepVote) != 5 || !isAlpha.MatchString(m.RepVote[:4]) || !isNumeric.MatchString(m.RepVote[4:]) {
-		return errors.ErrInternal(fmt.Sprintf("RepVote must be 4 letters (%s) and 1 digit (%s)", m.RepVote[:4], m.RepVote[4:]))
+	if len(m.RepVote) != 3 || !isAlphaNumeric.MatchString(m.RepVote) {
+		return errors.ErrInternal(fmt.Sprintf("RepVote must be 3 characters: %s", m.RepVote))
 	}
-	if len(m.Charity) != 3 || !isAlpha.MatchString(m.Charity) {
-		return errors.ErrInternal("Charity must be 3 letters")
+	if len(m.Charity) != 2 || !isAlphaNumeric.MatchString(m.Charity) {
+		return errors.ErrInternal("Charity must be 2 characters")
 	}
 	if len(m.PostCode) > 4 || len(m.PostCode) < 2 || !isAlphaNumeric.MatchString(m.PostCode) {
 		return errors.ErrInternal("Post Code must be 2-4 characters")
