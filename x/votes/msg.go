@@ -65,8 +65,11 @@ func (m *Vote) Validate() error {
 		return errors.ErrInternal("Charity must be alphanumeric")
 	}
 	// 0, 2, 3 are all valid lengths
-	if len(m.PostCode) > 4 || len(m.PostCode) == 1 || !isAlphaNumeric.MatchString(m.PostCode) {
+	if len(m.PostCode) > 4 || len(m.PostCode) == 1 {
 		return errors.ErrInternal("Post Code must be 2-4 characters")
+	}
+	if len(m.PostCode) != 0 && !isAlphaNumeric.MatchString(m.PostCode) {
+		return errors.ErrInternal("Post Code must be alphanumeric")
 	}
 	if m.BirthYear != 0 && (m.BirthYear < 1900 || m.BirthYear > 2002) {
 		return errors.ErrInternal("Must include full birth year, between 1900 and 2002")
