@@ -41,9 +41,6 @@ func (m *VoteRecord) Validate() error {
 	if len(m.SmsCode) > 100 {
 		return errors.ErrInternal("sms code to long")
 	}
-	if len(m.TransactionId) == 0 {
-		return errors.ErrInternal("Missing transaction id")
-	}
 	if len(m.TransactionId) > 100 {
 		return errors.ErrInternal("transaction id to long")
 	}
