@@ -51,7 +51,7 @@ func buildVote(mainVote int32, repVote, charity, postCode string, birth, donatio
 	}
 	now := time.Now().UTC()
 	res := &VoteRecord{
-		Identitifer:   id,
+		Identifier:   id,
 		SmsCode:       vote.EncodeToSms(),
 		TransactionId: randString(20),
 		VotedAt:       &now,
@@ -88,12 +88,12 @@ func TestRecordVoteHandler(t *testing.T) {
 
 	// this is for over-writing
 	vote1 := mustBuildVote(1, rep1, "HP", "SW87", 1991, 100, "")
-	id1 := vote1.Identitifer
+	id1 := vote1.Identifier
 	vote1b := mustBuildVote(2, rep2, "F7", "SW87", 1991, 100, id1)
 
 	// this is for addition
 	vote2 := mustBuildVote(1, rep2, "MR", "B18", 1980, 500, "")
-	id2 := vote2.Identitifer
+	id2 := vote2.Identifier
 
 	cases := map[string]struct {
 		actions []action

@@ -16,7 +16,7 @@ message Vote {
 
 message VoteRecord {
     Vote vote = 1;
-    string identitifer = 2;
+    string identifier = 2;
     string sms_code = 3;
     string transaction_id = 4;
     google.protobuf.Timestamp voted_at = 5 [(gogoproto.stdtime) = true];

@@ -77,7 +77,7 @@ func (h *recordVoteHandler) Deliver(ctx weave.Context, db weave.KVStore, tx weav
 	}
 
 	// existing is non-nil if we voted before... to properly update talies
-	existing, err := h.bucket.GetVote(db, msg.Identitifer)
+	existing, err := h.bucket.GetVote(db, msg.Identifier)
 	if err != nil {
 		return res, err
 	}

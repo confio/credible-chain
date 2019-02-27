@@ -29,10 +29,10 @@ func (m *VoteRecord) Validate() error {
 	if m == nil {
 		return errors.ErrInternal("VoteRecord is <nil>")
 	}
-	if len(m.Identitifer) == 0 {
+	if len(m.Identifier) == 0 {
 		return errors.ErrInternal("Missing Identifier")
 	}
-	if len(m.Identitifer) > 100 {
+	if len(m.Identifier) > 100 {
 		return errors.ErrInternal("Identifier too long")
 	}
 	if len(m.SmsCode) == 0 {

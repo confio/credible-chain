@@ -12,7 +12,7 @@ func BuildVoteTx(identifier, smsCode, transactionID string, vote *votes.Vote) (*
 	stamp := time.Now().UTC()
 	msg := &votes.VoteRecord{
 		Vote:          vote,
-		Identitifer:   identifier,
+		Identifier:   identifier,
 		SmsCode:       smsCode,
 		TransactionId: transactionID,
 		VotedAt:       &stamp,

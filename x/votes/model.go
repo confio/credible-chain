@@ -20,7 +20,7 @@ func (v *VoteRecord) Copy() orm.CloneableData {
 	}
 	return &VoteRecord{
 		Vote:          vote,
-		Identitifer:   v.Identitifer,
+		Identifier:   v.Identifier,
 		SmsCode:       v.SmsCode,
 		TransactionId: v.TransactionId,
 		VotedAt:       v.VotedAt,
@@ -64,7 +64,7 @@ func NewVoteBucket() VoteBucket {
 }
 
 func (b *VoteBucket) Create(db weave.KVStore, v *VoteRecord) (orm.Object, error) {
-	key := []byte(v.Identitifer)
+	key := []byte(v.Identifier)
 	obj := orm.NewSimpleObj(key, v)
 	if err := obj.Validate(); err != nil {
 		return nil, err

@@ -60,7 +60,7 @@ func TestVoteTx(t *testing.T) {
 	err = voteRecord.Validate()
 	require.NoError(t, err)
 
-	assert.Equal(t, identifier, voteRecord.Identitifer)
+	assert.Equal(t, identifier, voteRecord.Identifier)
 	assert.EqualValues(t, vote, voteRecord.Vote)
 }
 
