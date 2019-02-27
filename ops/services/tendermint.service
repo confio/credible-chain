@@ -1,0 +1,14 @@
+[Unit]
+Description=Tendermint service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=3
+User=root
+ExecStart=/root/go/bin/tendermint node --home=/root/.credchain --proxy_app=tcp://localhost:11111
+
+[Install]
+WantedBy=multi-user.target

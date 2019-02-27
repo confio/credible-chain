@@ -1,0 +1,14 @@
+[Unit]
+Description=CredChain service
+After=tendermint.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=3
+User=root
+ExecStart=/root/go/bin/credchain -home=/root/.credchain start -bind=tcp://localhost:11111
+
+[Install]
+WantedBy=multi-user.target

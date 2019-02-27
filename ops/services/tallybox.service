@@ -1,0 +1,15 @@
+[Unit]
+Description=CredChain service
+After=credchain.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=3
+User=root
+ExecStartPre=/bin/sleep 5
+ExecStart=/root/go/bin/tallybox start -port=5005 -remote=http://localhost:26657
+
+[Install]
+WantedBy=multi-user.target

@@ -88,6 +88,7 @@ scp -r ops user@host:ops
 ssh user@host
 ./ops/install.sh
 ./ops/init.sh
+# note that run will install systemd services, so it will auto-restart on reboot
 ./ops/run.sh
 ```
 

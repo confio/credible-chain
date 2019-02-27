@@ -1,11 +1,16 @@
 #!/bin/bash
 set -o errexit -o nounset -o pipefail
 
-### TODO this needs better setup
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-tendermint node --home=$HOME/.credchain --proxy_app=tcp://localhost:11111 > tendermint.log &
-credchain start -bind=tcp://localhost:11111 > credchain.log & 
+# install the service files
+for file in ${SCRIPT_DIR}/services/*; do
+    cp $file /etc/systemd/system
+    base=$(basename $file)
+    systemctl enable $base
+done
 
-echo "Waiting for blockchain to start up"
-sleep 5
-tallybox start -port=5005 -remote=http://localhost:26657 > tallybox.log &
+# order matters....
+systemctl start tendermint.service
+systemctl start credchain.service
+systemctl start tallybox.service
