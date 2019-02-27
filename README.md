@@ -72,11 +72,23 @@ tallybox start -port=5005 -remote=http://localhost:26657
 ## Trying it out
 
 ```shell
-curl http://localhost:5005
-curl http://localhost:5005/tally
-curl -X POST http://localhost:5005/vote --data '{}'
-curl -X POST http://localhost:5005/vote --data '{"vote":{"main_vote":"A","rep_vote":"BRDX1","charity":"ABC","postCode":"SW16","birth_year":1980,"donation":100},"identitifer":"xxx123456xxx","sms_code":"BA383SKD 10","transaction_id":"tx id here","voted_at":"2019-02-21T13:27:20.070566467Z"}'
-curl http://localhost:5005/tally
+HOST=localhost
+# HOST=134.209.88.159
+curl http://$HOST:5005
+curl http://$HOST:5005/tally
+curl -X POST http://$HOST:5005/vote --data '{}'
+curl -X POST http://$HOST:5005/vote --data '{"vote":{"main_vote":1,"rep_vote":"BR1","charity":"MD","postCode":"SW16","birth_year":1980,"donation":100},"identitifer":"xxx123456xxx","sms_code":"BA383SKD 10","transaction_id":"tx id here","voted_at":"2019-02-21T13:27:20.070566467Z"}'
+curl http://$HOST:5005/tally
+```
+
+## Deployment Example
+
+```shell
+scp -r ops user@host:ops
+ssh user@host
+./ops/install.sh
+./ops/init.sh
+./ops/run.sh
 ```
 
 ## Blockchain Design
