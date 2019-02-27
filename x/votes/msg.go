@@ -61,8 +61,8 @@ func (m *Vote) Validate() error {
 	if len(m.RepVote) != 3 || !isAlphaNumeric.MatchString(m.RepVote) {
 		return errors.ErrInternal(fmt.Sprintf("RepVote must be 3 characters: %s", m.RepVote))
 	}
-	if len(m.Charity) > 0 && !isAlphaNumeric.MatchString(m.Charity) {
-		return errors.ErrInternal("Charity must be alphanumeric")
+	if len(m.Charity) == 0 || !isAlphaNumeric.MatchString(m.Charity) {
+		return errors.ErrInternal("Charity must be non-empty alphanumeric")
 	}
 	// 0, 2, 3 are all valid lengths
 	if len(m.PostCode) > 4 || len(m.PostCode) == 1 {
@@ -74,8 +74,8 @@ func (m *Vote) Validate() error {
 	if m.BirthYear != 0 && (m.BirthYear < 1900 || m.BirthYear > 2002) {
 		return errors.ErrInternal("Must include full birth year, between 1900 and 2002")
 	}
-	if m.Donation < 0 || m.Donation > 10000 {
-		return errors.ErrInternal("Donation must be between 0 and 100 pounds")
+	if m.Donation <= 0 || m.Donation > 10000 {
+		return errors.ErrInternal("Donation must be above 0 pence, max 100 pounds")
 	}
 	return nil
 }
