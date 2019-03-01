@@ -12,7 +12,7 @@ import (
 	wc "github.com/confio/credible-chain/weaveclient"
 )
 
-const NumConcurrentRequests = 10
+const NumConcurrentRequests = 50
 const CommitTimeout = 60 * time.Second
 
 type Pipeline struct {
