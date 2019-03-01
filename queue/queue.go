@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sync/atomic"
 
+	"github.com/pkg/errors"
+
 	app "github.com/confio/credible-chain/app"
 	wc "github.com/confio/credible-chain/weaveclient"
 	"github.com/confio/credible-chain/x/votes"
@@ -30,8 +32,8 @@ type Task struct {
 	Error    error
 }
 
-func (t *Task) WithError(err error) *Task {
-	t.Error = err
+func (t *Task) WithError(err error, msg string) *Task {
+	t.Error = errors.Wrap(err, msg)
 	return t
 }
 
@@ -95,7 +97,7 @@ func (q *Queue) Stats() Stats {
 func (q *Queue) done(task *Task) {
 	if task.Error != nil {
 		atomic.AddInt64(&q.errored, 1)
-		fmt.Printf("ERROR: %v\n", task.Error)
+		fmt.Printf("ERROR: %+v\n", task.Error)
 		fmt.Printf("FAILED: %#v\n", task.Vote)
 	} else {
 		atomic.AddInt64(&q.finished, 1)

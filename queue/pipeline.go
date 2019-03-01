@@ -1,9 +1,11 @@
 package queue
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/iov-one/weave/crypto"
+	"github.com/pkg/errors"
 	tmtypes "github.com/tendermint/tendermint/types"
 
 	"github.com/confio/credible-chain/client"
@@ -24,7 +26,7 @@ type Pipeline struct {
 func NewPipeline(client *client.CredibleClient, key *crypto.PrivateKey) (*Pipeline, error) {
 	chainID, err := client.ChainID()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Cannot init pipeline")
 	}
 	nonce := wc.NewNonce(client, key.PublicKey().Address())
 	p := &Pipeline{
@@ -71,15 +73,15 @@ func doSignAndSendTx(cc *client.CredibleClient, key *crypto.PrivateKey, nonce *w
 	vr := task.Vote
 	tx, err := client.BuildVoteTx(vr.Identifier, vr.SmsCode, vr.TransactionId, vr.Vote)
 	if err != nil {
-		return task.WithError(err)
+		return task.WithError(err, "Building vote")
 	}
 	n, err := nonce.Next()
 	if err != nil {
-		return task.WithError(err)
+		return task.WithError(err, "Getting Nonce")
 	}
 	err = client.SignTx(tx, key, chainID, n)
 	if err != nil {
-		return task.WithError(err)
+		return task.WithError(err, "Signing Transaction")
 	}
 	task.Tx = tx
 	task.Response = make(chan wc.BroadcastTxResponse)
@@ -88,8 +90,11 @@ func doSignAndSendTx(cc *client.CredibleClient, key *crypto.PrivateKey, nonce *w
 		// this means we didn't update the nonce, force a reset from the chain
 		nonce.ClearCache()
 		// wait for next block
-		waitForNextBlock(cc)
-		return task.WithError(err)
+		err2 := waitForNextBlock(cc)
+		if err2 != nil {
+			fmt.Printf("Cannot wait for next block: %+v\n", err2)
+		}
+		return task.WithError(err, "CheckTx")
 	}
 	return task
 }
@@ -111,7 +116,7 @@ func getResponse(in <-chan *Task, out chan<- *Task) {
 		result := <-task.Response
 		close(task.Response)
 		if result.Error != nil {
-			task.Error = result.Error
+			task = task.WithError(result.Error, "DeliverTx")
 		}
 		// no more info needed for success
 		out <- task
