@@ -338,7 +338,7 @@ func (b *WeaveClient) WaitForTxEvent(tx tmtypes.Tx, evtTyp string, timeout time.
 	}
 
 	// make sure to unregister after the test is over
-	defer b.conn.UnsubscribeAll(ctx, uuid)
+	defer b.conn.Unsubscribe(ctx, uuid, query)
 
 	select {
 	case evt, ok := <-evts:
