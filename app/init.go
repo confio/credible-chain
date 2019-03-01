@@ -32,11 +32,14 @@ func GenInitOptions(args []string) (json.RawMessage, error) {
 	opts := fmt.Sprintf(`
           {
 			"multisig": [],
-			"gconf": {
+			"update_validators": {
+				"addresses": ["%s"]
+			},
+			  "gconf": {
 				"votes:notary": "%s"
 			}	
           }
-	`, args[0])
+	`, args[0], args[0])
 	return []byte(opts), nil
 }
 

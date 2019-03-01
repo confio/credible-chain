@@ -18,6 +18,7 @@ import (
 	"github.com/iov-one/weave/x/multisig"
 	"github.com/iov-one/weave/x/sigs"
 	"github.com/iov-one/weave/x/utils"
+	"github.com/iov-one/weave/x/validators"
 
 	"github.com/confio/credible-chain/x/votes"
 )
@@ -50,6 +51,7 @@ func Chain(authFn x.Authenticator) app.Decorators {
 func Router(authFn x.Authenticator) app.Router {
 	r := app.NewRouter()
 	multisig.RegisterRoutes(r, authFn)
+	validators.RegisterRoutes(r, authFn, validators.NewController())
 	votes.RegisterRoutes(r, authFn)
 	return r
 }
@@ -62,6 +64,7 @@ func QueryRouter() weave.QueryRouter {
 		sigs.RegisterQuery,
 		multisig.RegisterQuery,
 		orm.RegisterQuery,
+		validators.RegisterQuery,
 		votes.RegisterQuery,
 	)
 	return r
