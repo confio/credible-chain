@@ -67,6 +67,7 @@ func (q *Queue) Push(task *Task) error {
 // It will block until all work is done and channels are closed
 func (q *Queue) Run(worker Worker) {
 	out := worker.Run(q.input)
+	fmt.Println("Pipeline started")
 	// read the output of the worker forever, updating stats
 	for {
 		task, more := <-out
@@ -93,8 +94,9 @@ func (q *Queue) Stats() Stats {
 
 func (q *Queue) done(task *Task) {
 	if task.Error != nil {
-		// TODO: mark which one it was for retry
 		atomic.AddInt64(&q.errored, 1)
+		fmt.Printf("ERROR: %v\n", task.Error)
+		fmt.Printf("FAILED: %#v\n", task.Vote)
 	} else {
 		atomic.AddInt64(&q.finished, 1)
 	}
