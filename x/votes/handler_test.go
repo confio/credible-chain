@@ -51,11 +51,10 @@ func buildVote(mainVote int32, repVote, charity, postCode string, birth, donatio
 	}
 	now := time.Now().UTC()
 	res := &VoteRecord{
-		Identifier:    id,
-		SmsCode:       vote.EncodeToSms(),
-		TransactionId: randString(20),
-		VotedAt:       &now,
-		Vote:          vote,
+		Identifier: id,
+		SmsCode:    vote.EncodeToSms(),
+		VotedAt:    &now,
+		Vote:       vote,
 	}
 	return res
 }

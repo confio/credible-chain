@@ -8,14 +8,13 @@ import (
 )
 
 // BuildVoteTx will create an unsigned tx to place a vote
-func BuildVoteTx(identifier, smsCode, transactionID string, vote *votes.Vote) (*app.Tx, error) {
+func BuildVoteTx(identifier, smsCode string, vote *votes.Vote) (*app.Tx, error) {
 	stamp := time.Now().UTC()
 	msg := &votes.VoteRecord{
-		Vote:          vote,
-		Identifier:   identifier,
-		SmsCode:       smsCode,
-		TransactionId: transactionID,
-		VotedAt:       &stamp,
+		Vote:       vote,
+		Identifier: identifier,
+		SmsCode:    smsCode,
+		VotedAt:    &stamp,
 	}
 	if err := msg.Validate(); err != nil {
 		return nil, err

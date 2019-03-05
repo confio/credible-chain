@@ -41,9 +41,6 @@ func (m *VoteRecord) Validate() error {
 	if len(m.SmsCode) > 100 {
 		return errors.ErrInternal("sms code to long")
 	}
-	if len(m.TransactionId) > 100 {
-		return errors.ErrInternal("transaction id to long")
-	}
 	if m.VotedAt == nil || m.VotedAt.Before(time.Date(2019, 2, 15, 12, 0, 0, 0, time.UTC)) {
 		return errors.ErrInternal("Need reasonable voted_at time")
 	}

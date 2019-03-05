@@ -27,7 +27,7 @@ func TestVoteTx(t *testing.T) {
 		BirthYear: 1980,
 		Donation:  100,
 	}
-	tx, err := BuildVoteTx(identifier, "BA383SKD 10", "tx id here", vote)
+	tx, err := BuildVoteTx(identifier, "BA383SKD 10", vote)
 	require.NoError(t, err)
 	// if we sign with 0, we can validate against an empty db
 	chainID := "ding-dong"
@@ -94,7 +94,7 @@ func TestOneVote(t *testing.T) {
 	identifier := "abcdef12345"
 
 	// prepare step
-	tx, err := BuildVoteTx(identifier, "BA383SKD 10", "tx id here", vote)
+	tx, err := BuildVoteTx(identifier, "BA383SKD 10", vote)
 	require.NoError(t, err)
 	nonce := wc.NewNonce(cc, notary.PublicKey().Address())
 	n, err := nonce.Next()

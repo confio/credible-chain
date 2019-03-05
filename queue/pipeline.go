@@ -71,7 +71,7 @@ func signTx(cc *client.CredibleClient, key *crypto.PrivateKey, nonce *wc.Nonce, 
 
 func doSignAndSendTx(cc *client.CredibleClient, key *crypto.PrivateKey, nonce *wc.Nonce, chainID string, task *Task) *Task {
 	vr := task.Vote
-	tx, err := client.BuildVoteTx(vr.Identifier, vr.SmsCode, vr.TransactionId, vr.Vote)
+	tx, err := client.BuildVoteTx(vr.Identifier, vr.SmsCode, vr.Vote)
 	if err != nil {
 		return task.WithError(err, "Building vote")
 	}

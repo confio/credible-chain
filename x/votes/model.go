@@ -19,11 +19,10 @@ func (v *VoteRecord) Copy() orm.CloneableData {
 		vote = vote.Copy().(*Vote)
 	}
 	return &VoteRecord{
-		Vote:          vote,
-		Identifier:   v.Identifier,
-		SmsCode:       v.SmsCode,
-		TransactionId: v.TransactionId,
-		VotedAt:       v.VotedAt,
+		Vote:       vote,
+		Identifier: v.Identifier,
+		SmsCode:    v.SmsCode,
+		VotedAt:    v.VotedAt,
 	}
 }
 
