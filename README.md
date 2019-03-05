@@ -77,7 +77,7 @@ HOST=localhost
 curl http://$HOST:5005
 curl http://$HOST:5005/tally
 curl -X POST http://$HOST:5005/vote --data '{}'
-curl -X POST http://$HOST:5005/vote --data '{"vote":{"main_vote":1,"rep_vote":"BR1","charity":"MD","postCode":"SW16","birth_year":1980,"donation":100},"identifier":"xxx123456xxx","sms_code":"BA383SKD 10","transaction_id":"tx id here","voted_at":"2019-02-21T13:27:20.070566467Z"}'
+curl -X POST http://$HOST:5005/vote --data '{"vote":{"main_vote":1,"rep_vote":"BR1","charity":"MD","postCode":"SW16","birth_year":1980,"donation":100},"identifier":"xxx123456xxx","sms_code":"BA383SKD 10","voted_at":"2019-02-21T13:27:20.070566467Z"}'
 curl http://$HOST:5005/tally
 ```
 
@@ -87,6 +87,7 @@ curl http://$HOST:5005/tally
 scp -r ops user@host:ops
 ssh user@host
 ./ops/install.sh
+source .bash_aliases
 ./ops/init.sh
 # note that run will install systemd services, so it will auto-restart on reboot
 ./ops/run.sh
